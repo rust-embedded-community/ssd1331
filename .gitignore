@@ -83,3 +83,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+/target
+**/*.rs.bk
+Cargo.lock
