@@ -20,13 +20,18 @@ pub mod builder;
 
 // 96 x 64 pixels, 16 bits (two bytes) per pixel
 // FIXME: Crashes in non-release mode, presumably consumes too much memory
-type ScreenBuffer = [u32; 3072];
+type ScreenBuffer = [Pixel; 1024];
 
 use command::*;
 use interface::DisplayInterface;
 use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 pub use builder::Builder;
+
+type Coord = (u32, u32);
+type Color = u16;
+
+type Pixel = (Coord, Color);
 
 /// SSD1331 driver
 pub struct SSD1331<DI> {
@@ -46,13 +51,13 @@ where
     pub fn new(iface: DI) -> SSD1331<DI> {
         SSD1331 {
             iface,
-            buffer: [0; 3072],
+            buffer: [0; 1024],
         }
     }
 
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        self.buffer = [0; 3072];
+        // TODO
     }
 
     /// Reset display
