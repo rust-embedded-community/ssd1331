@@ -92,7 +92,9 @@ impl Command {
             Command::Contrast(vala, valb, valc) => {
                 iface.send_command(0x81)?;
                 iface.send_command(vala)?;
+                iface.send_command(0x82)?;
                 iface.send_command(valb)?;
+                iface.send_command(0x83)?;
                 iface.send_command(valc)?;
             }
             Command::AllOn(on) => {

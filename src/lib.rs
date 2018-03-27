@@ -19,7 +19,8 @@ pub mod interface;
 pub mod builder;
 
 // 96 x 64 pixels, 16 bits (two bytes) per pixel
-type ScreenBuffer = [u8; 12288];
+// FIXME: Crashes in non-release mode, presumably consumes too much memory
+type ScreenBuffer = [u32; 3072];
 
 use command::*;
 use interface::DisplayInterface;
@@ -45,13 +46,13 @@ where
     pub fn new(iface: DI) -> SSD1331<DI> {
         SSD1331 {
             iface,
-            buffer: [0; 12288],
+            buffer: [0; 3072],
         }
     }
 
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        self.buffer = [0; 12288];
+        self.buffer = [0; 3072];
     }
 
     /// Reset display
@@ -75,7 +76,7 @@ where
         Command::ColumnAddress(0, display_width - 1).send(&mut self.iface)?;
         Command::PageAddress(0.into(), (display_height - 1).into()).send(&mut self.iface)?;
 
-        self.iface.send_data(&self.buffer)
+        self.iface.send_data(&[1, 2, 3])
     }
 
     /// Turn a pixel on or off
@@ -107,18 +108,11 @@ where
         Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
         Command::SegmentRemap(true).send(&mut self.iface)?;
         Command::ReverseComDir(true).send(&mut self.iface)?;
-
-        // match self.display_size {
-        //     DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        //     DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
-        //     DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        // }?;
-
-        Command::Contrast(0x8F, 0x8F, 0x8F).send(&mut self.iface)?;
+        Command::Contrast(0x80, 0x80, 0x80).send(&mut self.iface)?;
         Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
-        Command::AllOn(false).send(&mut self.iface)?;
-        Command::Invert(false).send(&mut self.iface)?;
+        Command::AllOn(true).send(&mut self.iface)?;
+        // Command::Invert(false).send(&mut self.iface)?;
         Command::EnableScroll(false).send(&mut self.iface)?;
         Command::DisplayOn(true).send(&mut self.iface)?;
 

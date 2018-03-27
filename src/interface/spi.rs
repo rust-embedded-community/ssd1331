@@ -46,6 +46,7 @@ where
         self.dc.set_high();
 
         self.spi.write(&buf)?;
+        self.spi.write(&buf)?;
 
         Ok(())
     }
