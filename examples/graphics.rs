@@ -1,6 +1,5 @@
-//! This example draws a small square one pixel at a time in the top left corner of the display
-//!
-//! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
+//! Draw a square, circle and triangle on the screen using the embedded_graphics library over a 4
+//! wire SPI interface.
 //!
 //! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
 //! SPI1.
@@ -16,7 +15,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example pixelsquare`.
+//! Run on a Blue Pill with `cargo run --example graphics`.
 
 #![no_std]
 #![no_main]
@@ -28,6 +27,8 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
+use embedded_graphics::prelude::*;
+use embedded_graphics::primitives::{Circle, Line, Rect};
 use hal::delay::Delay;
 use hal::prelude::*;
 use hal::spi::{Mode, Phase, Polarity, Spi};
@@ -79,29 +80,33 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    // Top side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(1, 0, 1);
-    disp.set_pixel(2, 0, 1);
-    disp.set_pixel(3, 0, 1);
+    disp.draw(
+        Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 16, 16 + 16))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
+    disp.draw(
+        Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 8, 16))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
+    disp.draw(
+        Line::new(Coord::new(8 + 16, 16 + 16), Coord::new(8 + 8, 16))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
 
-    // Right side
-    disp.set_pixel(3, 0, 1);
-    disp.set_pixel(3, 1, 1);
-    disp.set_pixel(3, 2, 1);
-    disp.set_pixel(3, 3, 1);
+    disp.draw(
+        Rect::new(Coord::new(48, 16), Coord::new(48 + 16, 16 + 16))
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
 
-    // Bottom side
-    disp.set_pixel(0, 3, 1);
-    disp.set_pixel(1, 3, 1);
-    disp.set_pixel(2, 3, 1);
-    disp.set_pixel(3, 3, 1);
-
-    // Left side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(0, 1, 1);
-    disp.set_pixel(0, 2, 1);
-    disp.set_pixel(0, 3, 1);
+    disp.draw(
+        Circle::new(Coord::new(96, 16 + 8), 8)
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
 
     disp.flush().unwrap();
 

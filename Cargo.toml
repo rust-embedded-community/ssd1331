@@ -1,47 +1,44 @@
 [package]
-name = "ssd1331"
-version = "0.1.0"
 authors = ["James Waples <jamwaffles@gmail.com>"]
 categories = ["embedded", "no-std"]
-keywords = ["no-std", "rtfm", "ssd1331", "oled", "embedded", "embedded-hal-driver"]
+description = "I2C/SPI driver for the SSD1331 OLED display controller"
+documentation = "https://jamwaffles.github.io/ssd1331"
+exclude = [".travis.yml", ".gitignore"]
+keywords = ["no-std", "ssd1331", "oled", "embedded", "embedded-hal-driver"]
+license = "MIT OR Apache-2.0"
+name = "ssd1331"
+readme = "README.md"
+repository = "https://github.com/jamwaffles/ssd1331"
+version = "0.1.0"
+edition = "2018"
+[badges.travis-ci]
+branch = "master"
+repository = "jamwaffles/ssd1331"
 
 [dependencies]
-embedded-hal = "0.1.2"
+embedded-hal = "0.2.2"
+
+[dev-dependencies.stm32f1xx-hal]
+version = "0.2.0"
+features = [ "rt", "stm32f103" ]
 
 [dependencies.embedded-graphics]
-path = "../embedded-graphics"
-version = "*"
 optional = true
+version = "0.4.5"
 
 [dev-dependencies]
-cortex-m = "0.4.3"
-aligned = "0.1.1"
-cortex-m-rtfm = "0.3.1"
-cortex-m-rtfm-macros = "0.3.0"
+cortex-m = "0.5.8"
+cortex-m-rt = "0.6.7"
+panic-semihosting = "0.5.1"
 
-[dev-dependencies.cortex-m-rt]
-features = ["abort-on-panic"]
-version = "0.3.12"
-
-# Must be installed from Git currently, not sure why it's not on crates.io
-# TODO: Replace this with a "normal" dependency in the future
-# TODO: Replace with @japaric's HAL once I2C support has landed
-[dev-dependencies.stm32f103xx-hal]
-git = "https://github.com/ilya-epifanov/stm32f103xx-hal.git"
-branch = "i2c-support"
-features = ["rt"]
-version = "*"
-
-# disable both incremental compilation and parallel codegen to reduce the chances of running into
-# rust-lang/rust#47074
+[features]
+default = ["graphics"]
+graphics = ["embedded-graphics"]
 [profile.dev]
 codegen-units = 1
 incremental = false
 
 [profile.release]
+codegen-units = 1
 debug = true
 lto = true
-
-[features]
-default = []
-graphics = ["embedded-graphics"]

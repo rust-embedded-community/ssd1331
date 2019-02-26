@@ -1,8 +1,26 @@
-[target.thumbv7m-none-eabi]
-runner = [ "arm-none-eabi-gdb.exe", "-iex", "set auto-load safe-path ." ]
+[target.thumbv6m-none-eabi]
+runner = 'gdb-multiarch'
 rustflags = [
   "-C", "link-arg=-Tlink.x",
-  "-C", "linker=arm-none-eabi-ld",
-  "-Z", "linker-flavor=ld",
-  "-Z", "thinlto=no",
 ]
+
+[target.thumbv7m-none-eabi]
+runner = 'gdb-multiarch'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+[target.thumbv7em-none-eabi]
+runner = 'gdb-multiarch'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+[target.thumbv7em-none-eabihf]
+runner = 'gdb-multiarch'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+[build]
+target = "thumbv7m-none-eabi"

@@ -1,23 +1,20 @@
-//! This example draws a small square one pixel at a time in the top left corner of the display
-//!
-//! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
-//!
-//! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
-//! SPI1.
-//!
-//! Wiring connections are as follows
-//!
-//! ```
-//! GND -> GND
-//! 3V3 -> VCC
-//! PA5 -> SCL
-//! PA7 -> SDA
-//! PB0 -> RST
-//! PB1 -> D/C
-//! ```
-//!
-//! Run on a Blue Pill with `cargo run --example pixelsquare`.
+# SSD1331 driver
 
+[![Build Status](https://travis-ci.org/jamwaffles/ssd1331.svg?branch=master)](https://travis-ci.org/jamwaffles/ssd1331)
+
+<!-- [![CRIUS display showing the Rust logo](readme_banner.jpg?raw=true)](examples/image.rs) -->
+
+SPI (4 wire) driver for the SSD1331 OLED display.
+
+<!-- See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1331-driver.html) for more information. -->
+
+## [Documentation](https://docs.rs/ssd1331)
+
+## [Examples](examples)
+
+From [`examples/image.rs`](examples/image.rs):
+
+```rust
 #![no_std]
 #![no_main]
 
@@ -28,9 +25,10 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use hal::delay::Delay;
+use embedded_graphics::image::Image1BPP;
+use embedded_graphics::prelude::*;
+use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
 use hal::stm32;
 use ssd1331::prelude::*;
 use ssd1331::Builder;
@@ -39,14 +37,10 @@ use ssd1331::Builder;
 fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let dp = stm32::Peripherals::take().unwrap();
-
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();
-
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
-
     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
-
     let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
     let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
 
@@ -54,10 +48,6 @@ fn main() -> ! {
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
-
-    let mut delay = Delay::new(cp.SYST, clocks);
-
-    let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
     let spi = Spi::spi1(
@@ -75,34 +65,12 @@ fn main() -> ! {
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
-    disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    // Top side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(1, 0, 1);
-    disp.set_pixel(2, 0, 1);
-    disp.set_pixel(3, 0, 1);
+    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Coord::new(32, 0));
 
-    // Right side
-    disp.set_pixel(3, 0, 1);
-    disp.set_pixel(3, 1, 1);
-    disp.set_pixel(3, 2, 1);
-    disp.set_pixel(3, 3, 1);
-
-    // Bottom side
-    disp.set_pixel(0, 3, 1);
-    disp.set_pixel(1, 3, 1);
-    disp.set_pixel(2, 3, 1);
-    disp.set_pixel(3, 3, 1);
-
-    // Left side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(0, 1, 1);
-    disp.set_pixel(0, 2, 1);
-    disp.set_pixel(0, 3, 1);
-
+    disp.draw(im.into_iter());
     disp.flush().unwrap();
 
     loop {}
@@ -112,3 +80,21 @@ fn main() -> ! {
 fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }
+
+```
+
+## License
+
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+  http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the
+work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
+additional terms or conditions.

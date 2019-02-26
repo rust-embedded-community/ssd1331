@@ -1,6 +1,5 @@
-//! This example draws a small square one pixel at a time in the top left corner of the display
-//!
-//! You will probably want to use the [`embedded_graphics`](https://crates.io/crates/embedded-graphics) crate to do more complex drawing.
+//! Print "Hello world!" with "Hello rust!" underneath. Uses the `embedded_graphics` crate to draw
+//! the text with a 6x8 pixel font.
 //!
 //! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
 //! SPI1.
@@ -16,7 +15,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example pixelsquare`.
+//! Run on a Blue Pill with `cargo run --example text`.
 
 #![no_std]
 #![no_main]
@@ -28,9 +27,10 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use hal::delay::Delay;
+use embedded_graphics::fonts::Font6x8;
+use embedded_graphics::prelude::*;
+use hal::i2c::{BlockingI2c, DutyCycle, Mode};
 use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
 use hal::stm32;
 use ssd1331::prelude::*;
 use ssd1331::Builder;
@@ -75,33 +75,20 @@ fn main() -> ! {
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
-    disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    // Top side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(1, 0, 1);
-    disp.set_pixel(2, 0, 1);
-    disp.set_pixel(3, 0, 1);
-
-    // Right side
-    disp.set_pixel(3, 0, 1);
-    disp.set_pixel(3, 1, 1);
-    disp.set_pixel(3, 2, 1);
-    disp.set_pixel(3, 3, 1);
-
-    // Bottom side
-    disp.set_pixel(0, 3, 1);
-    disp.set_pixel(1, 3, 1);
-    disp.set_pixel(2, 3, 1);
-    disp.set_pixel(3, 3, 1);
-
-    // Left side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(0, 1, 1);
-    disp.set_pixel(0, 2, 1);
-    disp.set_pixel(0, 3, 1);
+    disp.draw(
+        Font6x8::render_str("Hello world!")
+            .with_stroke(Some(1u8.into()))
+            .into_iter(),
+    );
+    disp.draw(
+        Font6x8::render_str("Hello Rust!")
+            .with_stroke(Some(1u8.into()))
+            .translate(Coord::new(0, 16))
+            .into_iter(),
+    );
 
     disp.flush().unwrap();
 
