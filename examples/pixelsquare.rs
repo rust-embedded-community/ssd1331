@@ -79,29 +79,31 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
+    let value = 0xffff;
+
     // Top side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(1, 0, 1);
-    disp.set_pixel(2, 0, 1);
-    disp.set_pixel(3, 0, 1);
+    disp.set_pixel(0, 0, value);
+    disp.set_pixel(1, 0, value);
+    disp.set_pixel(2, 0, value);
+    disp.set_pixel(3, 0, value);
 
     // Right side
-    disp.set_pixel(3, 0, 1);
-    disp.set_pixel(3, 1, 1);
-    disp.set_pixel(3, 2, 1);
-    disp.set_pixel(3, 3, 1);
+    disp.set_pixel(3, 0, value);
+    disp.set_pixel(3, 1, value);
+    disp.set_pixel(3, 2, value);
+    disp.set_pixel(3, 3, value);
 
     // Bottom side
-    disp.set_pixel(0, 3, 1);
-    disp.set_pixel(1, 3, 1);
-    disp.set_pixel(2, 3, 1);
-    disp.set_pixel(3, 3, 1);
+    disp.set_pixel(0, 3, value);
+    disp.set_pixel(1, 3, value);
+    disp.set_pixel(2, 3, value);
+    disp.set_pixel(3, 3, value);
 
     // Left side
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(0, 1, 1);
-    disp.set_pixel(0, 2, 1);
-    disp.set_pixel(0, 3, 1);
+    disp.set_pixel(0, 0, value);
+    disp.set_pixel(0, 1, value);
+    disp.set_pixel(0, 2, value);
+    disp.set_pixel(0, 3, value);
 
     disp.flush().unwrap();
 

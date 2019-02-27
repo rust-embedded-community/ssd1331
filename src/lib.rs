@@ -116,7 +116,7 @@
 // TODO: Docs
 // #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
-#![deny(warnings)]
+// #![deny(warnings)]
 #![deny(missing_copy_implementations)]
 #![deny(trivial_casts)]
 #![deny(trivial_numeric_casts)]
