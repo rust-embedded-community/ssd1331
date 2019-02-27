@@ -2,13 +2,11 @@
 
 use crate::command::{AddrMode, Command, VcomhLevel};
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {
     iface: DI,
-    display_size: DisplaySize,
     display_rotation: DisplayRotation,
 }
 
@@ -17,14 +15,9 @@ where
     DI: DisplayInterface,
 {
     /// Create new DisplayProperties instance
-    pub fn new(
-        iface: DI,
-        display_size: DisplaySize,
-        display_rotation: DisplayRotation,
-    ) -> DisplayProperties<DI> {
+    pub fn new(iface: DI, display_rotation: DisplayRotation) -> DisplayProperties<DI> {
         DisplayProperties {
             iface,
-            display_size,
             display_rotation,
         }
     }
@@ -82,11 +75,6 @@ where
         Ok(())
     }
 
-    /// Get the configured display size
-    pub fn get_size(&self) -> DisplaySize {
-        self.display_size
-    }
-
     // TODO: Replace (u8, u8) with a dimensioney type for consistency
     // TOOD: Make doc tests work
     /// Get display dimensions, taking into account the current rotation of the display
@@ -117,11 +105,9 @@ where
     /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));
     /// ```
     pub fn get_dimensions(&self) -> (u8, u8) {
-        let (w, h) = self.display_size.dimensions();
-
         match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (w, h),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (h, w),
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (96, 64),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (64, 96),
         }
     }
 

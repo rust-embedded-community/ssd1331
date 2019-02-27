@@ -130,7 +130,6 @@ extern crate embedded_hal as hal;
 pub mod builder;
 mod command;
 pub mod displayrotation;
-mod displaysize;
 pub mod interface;
 pub mod mode;
 pub mod prelude;

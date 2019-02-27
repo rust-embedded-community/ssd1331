@@ -21,7 +21,6 @@ use hal;
 use hal::digital::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::SpiInterface;
 use crate::mode::displaymode::DisplayMode;
 use crate::mode::raw::RawMode;
@@ -30,7 +29,6 @@ use crate::properties::DisplayProperties;
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
 pub struct Builder {
-    display_size: DisplaySize,
     rotation: DisplayRotation,
 }
 
@@ -44,16 +42,7 @@ impl Builder {
     /// Create new builder with a default size of 128 x 64 pixels and no rotation.
     pub fn new() -> Self {
         Self {
-            display_size: DisplaySize::Display128x64,
             rotation: DisplayRotation::Rotate0,
-        }
-    }
-
-    /// Set the size of the display. Supported sizes are defined by [DisplaySize].
-    pub fn with_size(&self, display_size: DisplaySize) -> Self {
-        Self {
-            display_size,
-            ..*self
         }
     }
 
@@ -74,8 +63,7 @@ impl Builder {
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
-        let properties =
-            DisplayProperties::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+        let properties = DisplayProperties::new(SpiInterface::new(spi, dc), self.rotation);
         DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
     }
 }

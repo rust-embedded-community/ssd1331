@@ -20,7 +20,6 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
-use crate::displaysize::DisplaySize;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
@@ -78,25 +77,19 @@ where
 
     /// Write out data to display
     pub fn flush(&mut self) -> Result<(), ()> {
-        let display_size = self.properties.get_size();
-
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
-        let (display_width, display_height) = display_size.dimensions();
+        let (display_width, display_height) = self.properties.get_dimensions();
         self.properties
             .set_draw_area((0, 0), (display_width, display_height))?;
 
-        match display_size {
-            DisplaySize::Display128x64 => self.properties.draw(&self.buffer),
-            DisplaySize::Display128x32 => self.properties.draw(&self.buffer[0..512]),
-            DisplaySize::Display96x16 => self.properties.draw(&self.buffer[0..192]),
-        }
+        self.properties.draw(&self.buffer)
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
-        let (display_width, _) = self.properties.get_size().dimensions();
+        let (display_width, _) = self.properties.get_dimensions();
         let display_rotation = self.properties.get_rotation();
 
         let idx = match display_rotation {
