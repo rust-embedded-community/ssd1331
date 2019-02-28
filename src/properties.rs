@@ -25,24 +25,18 @@ where
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init_column_mode(&mut self) -> Result<(), ()> {
-        // let (_, display_height) = self.get_dimensions();
+        let (_, display_height) = self.get_dimensions();
 
-        // let display_rotation = self.display_rotation;
+        let display_rotation = self.display_rotation;
 
-        // Command::DisplayOn(false).send(&mut self.iface)?;
-        // // Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
+        Command::DisplayOn(false).send(&mut self.iface)?;
+        // Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
         // Command::Multiplex(display_height - 1).send(&mut self.iface)?;
         // Command::DisplayOffset(0).send(&mut self.iface)?;
         // Command::StartLine(0).send(&mut self.iface)?;
         // // Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
 
-        // self.set_rotation(display_rotation)?;
-
-        // // match self.display_size {
-        // //     DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        // //     DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
-        // //     DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        // // }?;
+        self.set_rotation(display_rotation)?;
 
         // // Values taken from [here](https://github.com/adafruit/Adafruit-SSD1331-OLED-Driver-Library-for-Arduino/blob/master/Adafruit_SSD1331.cpp#L119-L124)
         // Command::Contrast(0x91, 0x50, 0x7D).send(&mut self.iface)?;
@@ -50,18 +44,17 @@ where
         // Command::VcomhDeselect(VcomhLevel::V071).send(&mut self.iface)?;
         // Command::AllOn(false).send(&mut self.iface)?;
         // Command::Invert(false).send(&mut self.iface)?;
-        // // Command::EnableScroll(false).send(&mut self.iface)?;
         // Command::DisplayOn(true).send(&mut self.iface)?;
 
-        let cmds = [
-            0xAE, 0xA0, 0x72, 0xA1, 0x0, 0xA2, 0x0, 0xA4, 0xA8, 0x3F, 0xAD, 0x8E, 0xB0, 0x0B, 0xB1,
-            0x31, 0xB3, 0xF0, 0x8A, 0x64, 0x8B, 0x78, 0x8C, 0x64, 0xBB, 0x3A, 0xBE, 0x3E, 0x87,
-            0x06, 0x81, 0x91, 0x82, 0x50, 0x83, 0x7D, 0xAF,
-        ];
+        // let cmds = [
+        //     0xA0, 0x72, 0xA1, 0x0, 0xA2, 0x0, 0xA4, 0xA8, 0x3F, 0xAD, 0x8E, 0xB0, 0x0B, 0xB1, 0x31,
+        //     0xB3, 0xF0, 0x8A, 0x64, 0x8B, 0x78, 0x8C, 0x64, 0xBB, 0x3A, 0xBE, 0x3E, 0x87, 0x06,
+        //     0x81, 0x91, 0x82, 0x50, 0x83, 0x7D,
+        // ];
 
-        // let cmds = [0xAF];
+        // self.iface.send_commands(&cmds);
 
-        self.iface.send_commands(&cmds);
+        Command::DisplayOn(true).send(&mut self.iface)?;
 
         Ok(())
     }
@@ -124,6 +117,7 @@ where
         self.display_rotation
     }
 
+    // TODO: Correct true/false values
     /// Set the display rotation
     pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
         self.display_rotation = display_rotation;

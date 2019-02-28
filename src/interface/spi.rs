@@ -35,8 +35,6 @@ where
 
         self.spi.write(&cmds).map_err(|_| ())?;
 
-        // self.dc.set_high();
-
         Ok(())
     }
 
