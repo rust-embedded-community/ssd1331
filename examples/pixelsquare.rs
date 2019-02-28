@@ -79,31 +79,34 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let value = 0xffff;
+    let white = 0xffff;
+    let red = 0xf800;
+    let green = 0x07e0;
+    let blue = 0x001f;
 
     // Top side
-    disp.set_pixel(0, 0, value);
-    disp.set_pixel(1, 0, value);
-    disp.set_pixel(2, 0, value);
-    disp.set_pixel(3, 0, value);
+    disp.set_pixel(0, 0, white);
+    disp.set_pixel(1, 0, white);
+    disp.set_pixel(2, 0, white);
+    disp.set_pixel(3, 0, white);
 
     // Right side
-    disp.set_pixel(3, 0, value);
-    disp.set_pixel(3, 1, value);
-    disp.set_pixel(3, 2, value);
-    disp.set_pixel(3, 3, value);
+    disp.set_pixel(3, 0, red);
+    disp.set_pixel(3, 1, red);
+    disp.set_pixel(3, 2, red);
+    disp.set_pixel(3, 3, red);
 
     // Bottom side
-    disp.set_pixel(0, 3, value);
-    disp.set_pixel(1, 3, value);
-    disp.set_pixel(2, 3, value);
-    disp.set_pixel(3, 3, value);
+    disp.set_pixel(0, 3, green);
+    disp.set_pixel(1, 3, green);
+    disp.set_pixel(2, 3, green);
+    disp.set_pixel(3, 3, green);
 
     // Left side
-    disp.set_pixel(0, 0, value);
-    disp.set_pixel(0, 1, value);
-    disp.set_pixel(0, 2, value);
-    disp.set_pixel(0, 3, value);
+    disp.set_pixel(0, 0, blue);
+    disp.set_pixel(0, 1, blue);
+    disp.set_pixel(0, 2, blue);
+    disp.set_pixel(0, 3, blue);
 
     disp.flush().unwrap();
 
