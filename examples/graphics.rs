@@ -80,31 +80,35 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
+    let red: u16 = 0xf800;
+    let green: u16 = 0x07e0;
+    let blue: u16 = 0x001f;
+
     disp.draw(
         Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 16, 16 + 16))
-            .with_stroke(Some(1u8.into()))
+            .with_stroke(Some(red.into()))
             .into_iter(),
     );
     disp.draw(
         Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 8, 16))
-            .with_stroke(Some(1u8.into()))
+            .with_stroke(Some(red.into()))
             .into_iter(),
     );
     disp.draw(
         Line::new(Coord::new(8 + 16, 16 + 16), Coord::new(8 + 8, 16))
-            .with_stroke(Some(1u8.into()))
+            .with_stroke(Some(red.into()))
             .into_iter(),
     );
 
     disp.draw(
-        Rect::new(Coord::new(48, 16), Coord::new(48 + 16, 16 + 16))
-            .with_stroke(Some(1u8.into()))
+        Rect::new(Coord::new(36, 16), Coord::new(36 + 16, 16 + 16))
+            .with_stroke(Some(green.into()))
             .into_iter(),
     );
 
     disp.draw(
-        Circle::new(Coord::new(96, 16 + 8), 8)
-            .with_stroke(Some(1u8.into()))
+        Circle::new(Coord::new(72, 16 + 8), 8)
+            .with_stroke(Some(blue.into()))
             .into_iter(),
     );
 
