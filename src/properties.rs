@@ -30,21 +30,20 @@ where
         let display_rotation = self.display_rotation;
 
         Command::DisplayOn(false).send(&mut self.iface)?;
-        // Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
-        // Command::Multiplex(display_height - 1).send(&mut self.iface)?;
-        // Command::DisplayOffset(0).send(&mut self.iface)?;
-        // Command::StartLine(0).send(&mut self.iface)?;
-        // // Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
+        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
+        Command::Multiplex(display_height - 1).send(&mut self.iface)?;
+        Command::DisplayOffset(0).send(&mut self.iface)?;
+        Command::StartLine(0).send(&mut self.iface)?;
 
         self.set_rotation(display_rotation)?;
 
-        // // Values taken from [here](https://github.com/adafruit/Adafruit-SSD1331-OLED-Driver-Library-for-Arduino/blob/master/Adafruit_SSD1331.cpp#L119-L124)
-        // Command::Contrast(0x91, 0x50, 0x7D).send(&mut self.iface)?;
-        // // Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
-        // Command::VcomhDeselect(VcomhLevel::V071).send(&mut self.iface)?;
-        // Command::AllOn(false).send(&mut self.iface)?;
-        // Command::Invert(false).send(&mut self.iface)?;
-        // Command::DisplayOn(true).send(&mut self.iface)?;
+        // Values taken from [here](https://github.com/adafruit/Adafruit-SSD1331-OLED-Driver-Library-for-Arduino/blob/master/Adafruit_SSD1331.cpp#L119-L124)
+        Command::Contrast(0x91, 0x50, 0x7D).send(&mut self.iface)?;
+        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
+        Command::VcomhDeselect(VcomhLevel::V071).send(&mut self.iface)?;
+        Command::AllOn(false).send(&mut self.iface)?;
+        Command::Invert(false).send(&mut self.iface)?;
+        Command::DisplayOn(true).send(&mut self.iface)?;
 
         // let cmds = [
         //     0xA0, 0x72, 0xA1, 0x0, 0xA2, 0x0, 0xA4, 0xA8, 0x3F, 0xAD, 0x8E, 0xB0, 0x0B, 0xB1, 0x31,
