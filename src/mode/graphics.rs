@@ -85,12 +85,12 @@ where
     pub fn flush(&mut self) -> Result<(), ()> {
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
-        // let (display_width, display_height) = self.properties.get_dimensions();
-        // self.properties
-        //     .set_draw_area((0, 0), (display_width, display_height))?;
+        let (display_width, display_height) = self.properties.get_dimensions();
+        self.properties
+            .set_draw_area((0, 0), (display_width, display_height))?;
 
-        // self.properties.draw(&self.buffer)
-        self.properties.draw(&[0xff; BUF_SIZE])
+        self.properties.draw(&self.buffer)
+        // self.properties.draw(&[0xff; BUF_SIZE])
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y

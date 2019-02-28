@@ -53,13 +53,13 @@ where
         // // Command::EnableScroll(false).send(&mut self.iface)?;
         // Command::DisplayOn(true).send(&mut self.iface)?;
 
-        // let cmds = [
-        //     0xAE, 0xA0, 0x72, 0xA1, 0x0, 0xA2, 0x0, 0xA4, 0xA8, 0x3F, 0xAD, 0x8E, 0xB0, 0x0B, 0xB1,
-        //     0x31, 0xB3, 0xF0, 0x8A, 0x64, 0x8B, 0x78, 0x8C, 0x64, 0xBB, 0x3A, 0xBE, 0x3E, 0x87,
-        //     0x06, 0x81, 0x91, 0x82, 0x50, 0x83, 0x7D, 0xAF,
-        // ];
+        let cmds = [
+            0xAE, 0xA0, 0x72, 0xA1, 0x0, 0xA2, 0x0, 0xA4, 0xA8, 0x3F, 0xAD, 0x8E, 0xB0, 0x0B, 0xB1,
+            0x31, 0xB3, 0xF0, 0x8A, 0x64, 0x8B, 0x78, 0x8C, 0x64, 0xBB, 0x3A, 0xBE, 0x3E, 0x87,
+            0x06, 0x81, 0x91, 0x82, 0x50, 0x83, 0x7D, 0xAF,
+        ];
 
-        let cmds = [0xAF];
+        // let cmds = [0xAF];
 
         self.iface.send_commands(&cmds);
 
@@ -70,8 +70,8 @@ where
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
-        // Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
-        // Command::RowAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+        Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
+        Command::RowAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
         Ok(())
     }
 
@@ -79,7 +79,6 @@ where
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
-        // self.iface.send_commands(&[0x15, 0x00, 95, 0x75, 0x00, 63]);
         self.iface.send_data(buffer)?;
         Ok(())
     }
