@@ -25,8 +25,7 @@ use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
 
 /// 96px x 64px screen with 16 bits (2 bytes) per pixel
-// const BUF_SIZE: usize = 12288;
-const BUF_SIZE: usize = 6144;
+const BUF_SIZE: usize = 12288;
 
 // TODO: Add to prelude
 /// Graphics mode handler
