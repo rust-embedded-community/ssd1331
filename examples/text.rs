@@ -80,14 +80,18 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
+    let white: u16 = 0xffff;
+    // Red with a bit of green equals orange
+    let rust: u16 = 0b11111_000111_00000;
+
     disp.draw(
         Font6x8::render_str("Hello world!")
-            .with_stroke(Some(1u8.into()))
+            .with_stroke(Some(white.into()))
             .into_iter(),
     );
     disp.draw(
         Font6x8::render_str("Hello Rust!")
-            .with_stroke(Some(1u8.into()))
+            .with_stroke(Some(rust.into()))
             .translate(Coord::new(0, 16))
             .into_iter(),
     );
