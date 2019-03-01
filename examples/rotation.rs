@@ -85,6 +85,7 @@ fn main() -> ! {
         .connect_spi(spi, dc)
         .into();
 
+    disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();
     disp.flush().unwrap();
 

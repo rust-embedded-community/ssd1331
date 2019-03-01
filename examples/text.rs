@@ -76,6 +76,7 @@ fn main() -> ! {
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
+    disp.reset(&mut rst, &mut delay);
     disp.init().unwrap();
     disp.flush().unwrap();
 
