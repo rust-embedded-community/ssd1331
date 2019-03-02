@@ -25,8 +25,8 @@ pub enum Command {
     RowAddress(u8, u8),
     /// Set display start line from 0-63
     StartLine(u8),
-    /// Set horizontal or vertical direction swap and color mode
-    RemapAndColorDepth(bool, bool, ColorMode),
+    /// Set horizontal or vertical direction swap, color format/depth and address increment mode
+    RemapAndColorDepth(bool, bool, ColorMode, AddressIncrementMode),
     /// Set multipex ratio from 15-63 (MUX-1)
     Multiplex(u8),
     /// Scan from COM[n-1] to COM0 (where N is mux ratio)
@@ -65,10 +65,11 @@ impl Command {
             Command::ColumnAddress(start, end) => ([0x15, start, end, 0, 0, 0, 0], 3),
             Command::RowAddress(start, end) => ([0x75, start, end, 0, 0, 0, 0], 3),
             Command::StartLine(line) => ([0xA1 | (0x3F & line), 0, 0, 0, 0, 0, 0], 1),
-            Command::RemapAndColorDepth(hremap, vremap, cmode) => (
+            Command::RemapAndColorDepth(hremap, vremap, cmode, addr_inc_mode) => (
                 [
                     0xA0,
-                    0x20 | ((vremap as u8) << 4 | (hremap as u8) << 1 | (cmode as u8) << 6),
+                    0x20 | ((vremap as u8) << 4 | (hremap as u8) << 1 | (cmode as u8) << 6)
+                        | (addr_inc_mode as u8),
                     0,
                     0,
                     0,
@@ -177,4 +178,15 @@ pub enum ColorMode {
 
     /// 65k colors per pixel
     CM65k = 0x01,
+}
+
+/// Address increment mode
+#[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
+pub enum AddressIncrementMode {
+    /// Horizontal address increment
+    Horizontal = 0x00,
+
+    /// Vertical address increment
+    Vertical = 0x01,
 }

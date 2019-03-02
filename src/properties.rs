@@ -1,6 +1,6 @@
 //! Container to store and set display properties
 
-use crate::command::{ColorMode, Command, VcomhLevel};
+use crate::command::{AddressIncrementMode, ColorMode, Command, VcomhLevel};
 use crate::displayrotation::DisplayRotation;
 use crate::interface::DisplayInterface;
 
@@ -123,20 +123,40 @@ where
 
         match display_rotation {
             DisplayRotation::Rotate0 => {
-                Command::RemapAndColorDepth(false, false, ColorMode::CM65k)
-                    .send(&mut self.iface)?;
+                Command::RemapAndColorDepth(
+                    false,
+                    false,
+                    ColorMode::CM65k,
+                    AddressIncrementMode::Horizontal,
+                )
+                .send(&mut self.iface)?;
             }
             DisplayRotation::Rotate90 => {
-                Command::RemapAndColorDepth(false, false, ColorMode::CM65k)
-                    .send(&mut self.iface)?;
+                Command::RemapAndColorDepth(
+                    false,
+                    false,
+                    ColorMode::CM65k,
+                    AddressIncrementMode::Vertical,
+                )
+                .send(&mut self.iface)?;
             }
             DisplayRotation::Rotate180 => {
-                Command::RemapAndColorDepth(false, false, ColorMode::CM65k)
-                    .send(&mut self.iface)?;
+                Command::RemapAndColorDepth(
+                    true,
+                    true,
+                    ColorMode::CM65k,
+                    AddressIncrementMode::Horizontal,
+                )
+                .send(&mut self.iface)?;
             }
             DisplayRotation::Rotate270 => {
-                Command::RemapAndColorDepth(false, false, ColorMode::CM65k)
-                    .send(&mut self.iface)?;
+                Command::RemapAndColorDepth(
+                    false,
+                    false,
+                    ColorMode::CM65k,
+                    AddressIncrementMode::Vertical,
+                )
+                .send(&mut self.iface)?;
             }
         };
 
