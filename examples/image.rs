@@ -85,8 +85,8 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let im = Image16BPP::new(include_bytes!("./ferris.raw"), 87, 64)
-        .translate(Coord::new((96 - 87) / 2, 0));
+    let im = Image16BPP::new(include_bytes!("./ferris.raw"), 86, 64)
+        .translate(Coord::new((96 - 86) / 2, 0));
 
     disp.draw(im.into_iter());
 
