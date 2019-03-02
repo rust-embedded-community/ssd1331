@@ -127,6 +127,9 @@
 
 extern crate embedded_hal as hal;
 
+const DISPLAY_WIDTH: u8 = 96;
+const DISPLAY_HEIGHT: u8 = 64;
+
 pub mod builder;
 mod command;
 pub mod displayrotation;

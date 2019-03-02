@@ -23,6 +23,7 @@ use crate::displayrotation::DisplayRotation;
 use crate::interface::DisplayInterface;
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayProperties;
+use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 /// 96px x 64px screen with 16 bits (2 bytes) per pixel
 const BUF_SIZE: usize = 12288;
@@ -83,8 +84,8 @@ where
     pub fn flush(&mut self) -> Result<(), ()> {
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
-        // let (display_width, display_height) = self.properties.get_dimensions();
-        self.properties.set_draw_area((0, 0), (96, 64))?;
+        self.properties
+            .set_draw_area((0, 0), (DISPLAY_WIDTH, DISPLAY_HEIGHT))?;
 
         self.properties.draw(&self.buffer)
     }
@@ -92,23 +93,21 @@ where
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
-        let display_width = 96;
-        let display_height = 64;
         let display_rotation = self.properties.get_rotation();
 
         let idx = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                if x >= display_width as u32 {
+                if x >= DISPLAY_WIDTH as u32 {
                     return;
                 }
-                ((y as usize) * display_width as usize) + (x as usize)
+                ((y as usize) * DISPLAY_WIDTH as usize) + (x as usize)
             }
 
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                if y >= display_width as u32 {
+                if y >= DISPLAY_WIDTH as u32 {
                     return;
                 }
-                ((y as usize) * display_height as usize) + (x as usize)
+                ((y as usize) * DISPLAY_HEIGHT as usize) + (x as usize)
             }
         } * 2;
 

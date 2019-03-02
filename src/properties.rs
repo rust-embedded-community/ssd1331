@@ -3,6 +3,7 @@
 use crate::command::{AddressIncrementMode, ColorMode, Command, VcomhLevel};
 use crate::displayrotation::DisplayRotation;
 use crate::interface::DisplayInterface;
+use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 /// Display properties struct
 pub struct DisplayProperties<DI> {
@@ -94,8 +95,12 @@ where
     /// ```
     pub fn get_dimensions(&self) -> (u8, u8) {
         match self.display_rotation {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (96, 64),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (64, 96),
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
+                (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+            }
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
+                (DISPLAY_HEIGHT, DISPLAY_WIDTH)
+            }
         }
     }
 
