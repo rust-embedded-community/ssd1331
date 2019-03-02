@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/jamwaffles/ssd1331.svg?branch=master)](https://travis-ci.org/jamwaffles/ssd1331)
 
-<!-- [![CRIUS display showing the Rust logo](readme_banner.jpg?raw=true)](examples/image.rs) -->
+[![SSD1331 display showing Ferris](readme_banner.jpg?raw=true)](examples/image.rs)
 
 SPI (4 wire) driver for the SSD1331 OLED display.
 
