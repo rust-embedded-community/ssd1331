@@ -68,8 +68,10 @@ impl Command {
             Command::RemapAndColorDepth(hremap, vremap, cmode, addr_inc_mode) => (
                 [
                     0xA0,
-                    0x20 | ((vremap as u8) << 4 | (hremap as u8) << 1 | (cmode as u8) << 6)
-                        | (addr_inc_mode as u8),
+                    0x20 | ((vremap as u8) << 4
+                        | (hremap as u8) << 1
+                        | (cmode as u8) << 6
+                        | (addr_inc_mode as u8)),
                     0,
                     0,
                     0,
