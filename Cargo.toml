@@ -2,14 +2,14 @@
 authors = ["James Waples <james@wapl.es>"]
 categories = ["embedded", "no-std"]
 description = "I2C/SPI driver for the SSD1331 OLED display controller"
-documentation = "https://jamwaffles.github.io/ssd1331"
+documentation = "https://docs.rs/ssd1331"
 exclude = [".travis.yml", ".gitignore"]
 keywords = ["no-std", "ssd1331", "oled", "embedded", "embedded-hal-driver"]
 license = "MIT OR Apache-2.0"
 name = "ssd1331"
 readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1331"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2018"
 [badges.travis-ci]
 branch = "master"
