@@ -33,6 +33,7 @@ extern crate stm32f1xx_hal as hal;
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::image::Image1BPP;
+use embedded_graphics::pixelcolor::PixelColorU16;
 use embedded_graphics::prelude::*;
 use hal::delay::Delay;
 use hal::prelude::*;
@@ -95,10 +96,14 @@ fn main() -> ! {
 
     let (w, h) = disp.get_dimensions();
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64)
-        .translate(Coord::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
+    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64);
+    // .translate(Coord::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
 
-    disp.draw(im.into_iter());
+    // Map 0x00 or 0x01 to 0x0000 or 0xffff to draw a white Rust logo from a 1BPP image
+    disp.draw(
+        im.into_iter()
+            .map(|p: Pixel<u8>| Pixel::<PixelColorU16>(p.0, (p.1 as u16 * 0xffff).into())),
+    );
 
     disp.flush().unwrap();
 
