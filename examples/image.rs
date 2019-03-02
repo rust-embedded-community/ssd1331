@@ -32,7 +32,7 @@ extern crate stm32f1xx_hal as hal;
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::image::Image1BPP;
+use embedded_graphics::image::Image16BPP;
 use embedded_graphics::prelude::*;
 use hal::delay::Delay;
 use hal::prelude::*;
@@ -85,7 +85,8 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64).translate(Coord::new(32, 0));
+    let im = Image16BPP::new(include_bytes!("./ferris.raw"), 87, 64)
+        .translate(Coord::new((96 - 87) / 2, 0));
 
     disp.draw(im.into_iter());
 
