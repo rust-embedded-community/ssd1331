@@ -8,6 +8,16 @@ SPI (4 wire) driver for the SSD1331 OLED display.
 
 <!-- See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1331-driver.html) for more information. -->
 
+The display is configured by this driver to use a 16 bit, R5 G6 B5 pixel definition.
+You can convert images into the correct RAW format with the following commands (assumes 8x8 PNG input):
+
+```bash
+convert ferris.png -flip -type truecolor -define bmp:subtype=RGB565 -depth 16 -strip ferris.bmp
+
+# Where 128 is (width * height * 2)
+tail -c 128 ferris.bmp > ferris.raw
+```
+
 ## [Documentation](https://docs.rs/ssd1331)
 
 ## [Examples](examples)
