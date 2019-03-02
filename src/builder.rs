@@ -46,9 +46,7 @@ impl Builder {
         }
     }
 
-    /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
-    /// 90º and 270º rotations are not supported by
-    /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
+    /// Set the rotation of the display to one of four values. Defaults to no rotation.
     pub fn with_rotation(&self, rotation: DisplayRotation) -> Self {
         Self { rotation, ..*self }
     }
