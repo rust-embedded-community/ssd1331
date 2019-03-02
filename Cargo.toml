@@ -1,5 +1,5 @@
 [package]
-authors = ["James Waples <jamwaffles@gmail.com>"]
+authors = ["James Waples <james@wapl.es>"]
 categories = ["embedded", "no-std"]
 description = "I2C/SPI driver for the SSD1331 OLED display controller"
 documentation = "https://jamwaffles.github.io/ssd1331"
