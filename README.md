@@ -9,20 +9,21 @@ SPI (4 wire) driver for the SSD1331 OLED display.
 <!-- See the [announcement blog post](https://wapl.es/electronics/rust/2018/04/30/ssd1331-driver.html) for more information. -->
 
 The display is configured by this driver to use a 16 bit, R5 G6 B5 pixel definition.
-You can convert images into the correct RAW format with the following commands (assumes 8x8 PNG input):
+You can convert images into the correct BMP format with the following commands:
 
 ```bash
-convert ferris.png -flip -type truecolor -define bmp:subtype=RGB565 -depth 16 -strip ferris.bmp
-
-# Where 128 is (width * height * 2)
-tail -c 128 ferris.bmp > ferris.raw
+convert my_image.png -flip -type truecolor -define bmp:subtype=RGB565 -depth 16 -strip my_image.bmp
 ```
+
+You can also export images directly from The GIMP by saving as `.bmp` and choosing the following option:
+
+![The GIMP RGB565 export option.](readme_gimp_export.png?raw=true)
 
 ## [Documentation](https://docs.rs/ssd1331)
 
 ## [Examples](examples)
 
-From [`examples/image.rs`](examples/image.rs):
+Load a BMP and display it in the center of the display. From [`examples/bmp.rs`](examples/bmp.rs):
 
 ```rust
 #![no_std]
@@ -78,7 +79,12 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let im = Image1BPP::new(include_bytes!("./ferris.raw"), 86, 64).translate(Coord::new(5, 0));
+    // 16BPP, RGB565-format BMP image
+    let im = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+
+    let centered = im.translate(Coord::new((96 - im.width() as i32) / 2, 0));
+
+    disp.draw(centered.into_iter());
 
     disp.draw(im.into_iter());
     disp.flush().unwrap();
