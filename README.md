@@ -99,6 +99,8 @@ fn HardFault(ef: &ExceptionFrame) -> ! {
 
 ```
 
+![Rust rainbow demo image.](readme_pride.jpg?raw=true)
+
 ## License
 
 Licensed under either of
