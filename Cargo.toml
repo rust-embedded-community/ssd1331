@@ -22,6 +22,11 @@ embedded-hal = "0.2.3"
 optional = true
 version = "0.6.0-alpha.2"
 
+# Turns `bmp` feature on in examples to enable `ImageBmp`
+[dev-dependencies.embedded-graphics]
+version = "0.6.0-alpha.2"
+features = ["bmp"]
+
 [dev-dependencies]
 cortex-m = "0.6.1"
 cortex-m-rt = "0.6.11"

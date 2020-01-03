@@ -20,21 +20,21 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rect};
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
-use hal::stm32;
+use embedded_graphics::{
+    geometry::Point,
+    pixelcolor::Rgb565,
+    prelude::*,
+    primitives::{Circle, Line, Rectangle},
+};
+use panic_semihosting as _;
 use ssd1331::prelude::*;
 use ssd1331::Builder;
+use stm32f1xx_hal::delay::Delay;
+use stm32f1xx_hal::prelude::*;
+use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
+use stm32f1xx_hal::stm32;
 
 #[entry]
 fn main() -> ! {
@@ -76,39 +76,37 @@ fn main() -> ! {
 
     let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
 
-    disp.reset(&mut rst, &mut delay);
+    disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let red: u16 = 0xf800;
-    let green: u16 = 0x07e0;
-    let blue: u16 = 0x001f;
-
     disp.draw(
-        Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 16, 16 + 16))
-            .with_stroke(Some(red.into()))
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 16, 16 + 16))
+            // Uses the `RED` constant defined on `Rgb565`. Could also be created with
+            // `Rgb565::new(255, 0, 0)`
+            .stroke(Some(Rgb565::RED))
             .into_iter(),
     );
     disp.draw(
-        Line::new(Coord::new(8, 16 + 16), Coord::new(8 + 8, 16))
-            .with_stroke(Some(red.into()))
+        Line::new(Point::new(8, 16 + 16), Point::new(8 + 8, 16))
+            .stroke(Some(Rgb565::RED))
             .into_iter(),
     );
     disp.draw(
-        Line::new(Coord::new(8 + 16, 16 + 16), Coord::new(8 + 8, 16))
-            .with_stroke(Some(red.into()))
-            .into_iter(),
-    );
-
-    disp.draw(
-        Rect::new(Coord::new(36, 16), Coord::new(36 + 16, 16 + 16))
-            .with_stroke(Some(green.into()))
+        Line::new(Point::new(8 + 16, 16 + 16), Point::new(8 + 8, 16))
+            .stroke(Some(Rgb565::RED))
             .into_iter(),
     );
 
     disp.draw(
-        Circle::new(Coord::new(72, 16 + 8), 8)
-            .with_stroke(Some(blue.into()))
+        Rectangle::new(Point::new(36, 16), Point::new(36 + 16, 16 + 16))
+            .stroke(Some(Rgb565::GREEN))
+            .into_iter(),
+    );
+
+    disp.draw(
+        Circle::new(Point::new(72, 16 + 8), 8)
+            .stroke(Some(Rgb565::BLUE))
             .into_iter(),
     );
 

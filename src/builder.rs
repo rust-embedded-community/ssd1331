@@ -17,14 +17,13 @@
 //! Builder::new().connect_spi(spi, dc);
 //! ```
 
-use hal;
-use hal::digital::OutputPin;
-
 use crate::displayrotation::DisplayRotation;
 use crate::interface::SpiInterface;
 use crate::mode::displaymode::DisplayMode;
 use crate::mode::raw::RawMode;
 use crate::properties::DisplayProperties;
+use embedded_hal::blocking::spi;
+use embedded_hal::digital::v2::OutputPin;
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone, Copy)]
@@ -58,7 +57,7 @@ impl Builder {
         dc: DC,
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
-        SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+        SPI: spi::Transfer<u8> + spi::Write<u8>,
         DC: OutputPin,
     {
         let properties = DisplayProperties::new(SpiInterface::new(spi, dc), self.rotation);
