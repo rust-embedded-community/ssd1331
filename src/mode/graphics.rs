@@ -17,7 +17,7 @@
 //! ```
 
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
 use crate::interface::DisplayInterface;
@@ -68,16 +68,19 @@ where
     }
 
     /// Reset display
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), ()>
     where
         RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        // TODO: Return PinError or however sh1106 does it
+        rst.set_high().map_err(|_| ())?;
         delay.delay_ms(1);
-        rst.set_low();
+        rst.set_low().map_err(|_| ())?;
         delay.delay_ms(10);
-        rst.set_high();
+        rst.set_high().map_err(|_| ())?;
+
+        Ok(())
     }
 
     /// Write out data to display
@@ -142,26 +145,37 @@ where
 }
 
 #[cfg(feature = "graphics")]
-extern crate embedded_graphics;
-#[cfg(feature = "graphics")]
-use self::embedded_graphics::{drawable, pixelcolor::PixelColorU16, Drawing};
+use embedded_graphics::{
+    drawable,
+    pixelcolor::{
+        raw::{RawData, RawU16},
+        Rgb565,
+    },
+    Drawing,
+};
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI>
+impl<DI> Drawing<Rgb565> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel<PixelColorU16>>,
+        T: IntoIterator<Item = drawable::Pixel<Rgb565>>,
     {
-        for pixel in item_pixels {
-            self.set_pixel((pixel.0).0, (pixel.0).1, pixel.1.into_inner());
+        // Filter out pixels that are off the top left of the screen
+        let on_screen_pixels = item_pixels
+            .into_iter()
+            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+
+        for drawable::Pixel(point, color) in on_screen_pixels {
+            // NOTE: The filter above means the coordinate conversions from `i32` to `u32` should
+            // never error.
+            self.set_pixel(
+                point.x as u32,
+                point.y as u32,
+                RawU16::from(color).into_inner(),
+            );
         }
     }
-}
-
-#[cfg(test)]
-mod tests {
-    // TODO lol
 }
