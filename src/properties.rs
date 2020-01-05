@@ -72,7 +72,6 @@ where
 
     /// Get display dimensions, taking into account the current rotation of the display
     ///
-    ///
     /// # Examples
     ///
     /// ## No rotation
@@ -128,7 +127,6 @@ where
         self.display_rotation
     }
 
-    // TODO: Correct true/false values
     /// Set the display rotation
     pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
         self.display_rotation = display_rotation;

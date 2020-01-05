@@ -1,18 +1,15 @@
 //! SSD1331 OLED display driver
 //!
-//! The driver must be initialised by passing an  SPI interface peripheral to the [`Builder`],
-//! which will in turn create a driver instance in a particular mode. By default, the builder
-//! returns a [`mode::RawMode`] instance which isn't very useful by itself. You can coerce the driver
-//! into a more useful mode by calling `into()` and defining the type you want to coerce to. For
-//! example, to initialise the display with an I2CSPI interface and [mode::GraphicsMode], you would do
-//! something like this:
+//! This crate is an SPI-based driver for the popular SSD1331 colour OLED display. This display uses
+//! an RGB565 colour space on a canvas of 96x64 pixels and runs over SPI. This driver should work
+//! with any device implementing the [embedded-hal] [`blocking::spi::Write`] trait.
 //!
-//! See the [example](https://github.com/jamwaffles/ssd1331/blob/master/examples/graphics.rs)
-//! for more usage. The [entire `embedded_graphics` featureset](https://github.com/jamwaffles/embedded-graphics#features)
-//! is supported by this driver.
+//! The [`Builder`] is the recommended way to initialise and start using the display.
 //!
-//! It's possible to customise the driver to suit your display/application. Take a look at the
-//! [Builder] for available options.
+//! [`embedded-graphics`] is also supported behind the `graphics` feature flag.
+//!
+//! Note that the driver requires at least 12288 bytes (96 x 64 pixels, 16 bits per pixel) of memory
+//! to store the display's framebuffer.
 //!
 //! # Examples
 //!
@@ -35,7 +32,7 @@
 //!
 //! // Use raw hex values
 //! display.set_pixel(10, 20, 0xf00);
-//! // Or embedded-graphics' `Rgb565`
+//! // Or embedded-graphics' `Rgb565` if the `graphics` feature is enabled
 //! display.set_pixel(10, 30, RawU16::from(Rgb565::new(255, 127, 0)).into_inner());
 //!
 //! display.flush();
@@ -64,6 +61,20 @@
 //!
 //! display.flush().unwrap();
 //! ```
+//!
+//! # Features
+//!
+//! ## `graphics`
+//!
+//! Enable the `graphics` feature in `Cargo.toml` to get access to features in the
+//! [`embedded-graphics`] crate. This adds the `.draw()` method to the [`Ssd1331`] struct which
+//! accepts any `embedded-graphics` compatible item.
+//!
+//! [embedded-hal]: https://docs.rs/embedded-hal
+//! [`blocking::spi::Write`]: https://docs.rs/embedded-hal/0.2.3/embedded_hal/blocking/spi/trait.Write.html
+//! [`Ssd1331`]: ./struct.Ssd1331.html
+//! [`Builder`]: ./struct.Builder.html
+//! [`embedded-graphics`]: https://docs.rs/embedded-graphics
 
 #![no_std]
 // #![deny(missing_debug_implementations)]
