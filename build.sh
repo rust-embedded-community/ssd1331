@@ -25,6 +25,6 @@ if [ -z $DISABLE_EXAMPLES ]; then
 	cargo build --target $TARGET --all-features --examples
 fi
 
-cargo doc --all-features
+cargo doc --all-features --target $TARGET
 
 linkchecker target/$TARGET/doc/ssd1331/index.html
