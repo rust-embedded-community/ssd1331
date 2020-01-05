@@ -29,7 +29,6 @@ use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::{image::ImageLE, prelude::*};
 use panic_semihosting as _;
-use ssd1331::prelude::*;
 use ssd1331::Builder;
 use stm32f1xx_hal::delay::Delay;
 use stm32f1xx_hal::prelude::*;
@@ -74,7 +73,7 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut disp = Builder::new().connect_spi(spi, dc);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();

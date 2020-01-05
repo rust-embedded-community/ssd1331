@@ -26,7 +26,6 @@ use embedded_graphics::{
     fonts::Font6x8, geometry::Point, pixelcolor::Rgb565, prelude::*, text_6x8,
 };
 use panic_semihosting as _;
-use ssd1331::prelude::*;
 use ssd1331::Builder;
 use stm32f1xx_hal::delay::Delay;
 use stm32f1xx_hal::prelude::*;
@@ -71,7 +70,7 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut disp = Builder::new().connect_spi(spi, dc);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();

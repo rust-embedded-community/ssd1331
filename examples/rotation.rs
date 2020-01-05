@@ -29,8 +29,7 @@ use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::prelude::*;
 use panic_semihosting as _;
-use ssd1331::prelude::*;
-use ssd1331::Builder;
+use ssd1331::{Builder, DisplayRotation};
 use stm32f1xx_hal::delay::Delay;
 use stm32f1xx_hal::prelude::*;
 use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
@@ -74,11 +73,10 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new()
+    let mut disp = Builder::new()
         // Set initial rotation at 90 degrees clockwise
-        .with_rotation(DisplayRotation::Rotate90)
-        .connect_spi(spi, dc)
-        .into();
+        .rotation(DisplayRotation::Rotate90)
+        .connect_spi(spi, dc);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
