@@ -23,26 +23,22 @@ You can also export images directly from The GIMP by saving as `.bmp` and choosi
 
 ## [Examples](examples)
 
-Load a BMP and display it in the center of the display. From [`examples/bmp.rs`](examples/bmp.rs):
+Load a BMP image of the Rust logo and display it in the center of the display. From
+[`examples/bmp.rs`](examples/bmp.rs):
 
-```rust
+```rust,no_run
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::image::Image1BPP;
-use embedded_graphics::prelude::*;
-use hal::i2c::{BlockingI2c, DutyCycle, Mode};
-use hal::prelude::*;
-use hal::stm32;
-use ssd1331::prelude::*;
+use embedded_graphics::{geometry::Point, image::ImageBmp, prelude::*};
+use panic_semihosting as _;
 use ssd1331::Builder;
+use stm32f1xx_hal::delay::Delay;
+use stm32f1xx_hal::prelude::*;
+use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
+use stm32f1xx_hal::stm32;
 
 #[entry]
 fn main() -> ! {
@@ -59,6 +55,8 @@ fn main() -> ! {
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
+    let mut delay = Delay::new(cp.SYST, clocks);
+    let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
     let spi = Spi::spi1(
@@ -74,19 +72,18 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut disp = Builder::new().connect_spi(spi, dc);
 
+    disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    // 16BPP, RGB565-format BMP image
-    let im = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+    let im = ImageBmp::new(include_bytes!("../examples/rust-pride.bmp")).unwrap();
 
-    let centered = im.translate(Coord::new((96 - im.width() as i32) / 2, 0));
+    let moved = im.translate(Point::new((96 - im.width() as i32) / 2, 0));
 
-    disp.draw(centered.into_iter());
+    disp.draw(moved.into_iter());
 
-    disp.draw(im.into_iter());
     disp.flush().unwrap();
 
     loop {}
@@ -96,7 +93,6 @@ fn main() -> ! {
 fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }
-
 ```
 
 ![Rust rainbow demo image.](readme_pride.jpg?raw=true)
