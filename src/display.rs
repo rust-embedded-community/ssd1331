@@ -1,67 +1,3 @@
-//! SSD1331 display
-//!
-//! # Examples
-//!
-//! ## Draw shapes and text with [`embedded-graphics`]
-//!
-//! This requires the `graphics` feature to be enabled
-//!
-//! ```rust
-//! use ssd1331::Builder;
-//! use embedded_graphics::{
-//!     prelude::*,
-//!     fonts::Font6x8,
-//!     geometry::Point,
-//!     image::ImageLE,
-//!     pixelcolor::Rgb565,
-//!     primitives::{Circle, Line, Rectangle},
-//!     Drawing,
-//! };
-//! # use ssd1331::test_helpers::{Pin, Spi};
-//!
-//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
-//! let spi = Spi;
-//! let dc = Pin;
-//!
-//! let mut display = Builder::new().connect_spi(spi, dc);
-//! let image = ImageLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
-//!
-//! // Initialise and clear the display
-//! display.init().unwrap();
-//! display.flush().unwrap();
-//!
-//! display.draw(
-//!     Line::new(Point::new(0, 0), Point::new(16, 16))
-//!         .stroke(Some(Rgb565::RED))
-//!         .stroke_width(1)
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
-//!         .stroke(Some(Rgb565::new(255, 127, 0)))
-//!         .stroke_width(1)
-//!         .into_iter(),
-//! );
-//! display.draw(
-//!     Circle::new(Point::new(64, 8), 8)
-//!         .stroke(Some(Rgb565::GREEN))
-//!         .stroke_width(1)
-//!         .into_iter(),
-//! );
-//! display.draw(&image);
-//! display.draw(
-//!     Font6x8::render_str("Hello Rust!")
-//!         .translate(Point::new(24, 24))
-//!         .style(Style::stroke(Rgb565::RED))
-//!         .into_iter(),
-//! );
-//!
-//! // Render graphics objects to the screen
-//! display.flush().unwrap();
-//! ```
-//!
-//! [`embedded-graphics`]: https://crates.io/crates/embedded-graphics
-
 use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
 
@@ -72,7 +8,73 @@ use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 /// 96px x 64px screen with 16 bits (2 bytes) per pixel
 const BUF_SIZE: usize = 12288;
 
-/// Graphics mode handler
+/// SSD1331 display interface
+///
+/// This is the main display driver interface. It is recommended that the [`Builder`] is used to
+/// create instances of it.
+///
+/// # Examples
+///
+/// ## Draw shapes and text with [`embedded-graphics`]
+///
+/// This requires the `graphics` feature to be enabled
+///
+/// ```rust
+/// use ssd1331::Builder;
+/// use embedded_graphics::{
+///     prelude::*,
+///     fonts::Font6x8,
+///     geometry::Point,
+///     image::ImageLE,
+///     pixelcolor::Rgb565,
+///     primitives::{Circle, Line, Rectangle},
+///     Drawing,
+/// };
+/// # use ssd1331::test_helpers::{Pin, Spi};
+///
+/// // Set up SPI interface and digital pin. These are stub implementations used in examples.
+/// let spi = Spi;
+/// let dc = Pin;
+///
+/// let mut display = Builder::new().connect_spi(spi, dc);
+/// let image = ImageLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
+///
+/// // Initialise and clear the display
+/// display.init().unwrap();
+/// display.flush().unwrap();
+///
+/// display.draw(
+///     Line::new(Point::new(0, 0), Point::new(16, 16))
+///         .stroke(Some(Rgb565::RED))
+///         .stroke_width(1)
+///         .into_iter(),
+/// );
+/// display.draw(
+///     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
+///         .stroke(Some(Rgb565::new(255, 127, 0)))
+///         .stroke_width(1)
+///         .into_iter(),
+/// );
+/// display.draw(
+///     Circle::new(Point::new(64, 8), 8)
+///         .stroke(Some(Rgb565::GREEN))
+///         .stroke_width(1)
+///         .into_iter(),
+/// );
+/// display.draw(&image);
+/// display.draw(
+///     Font6x8::render_str("Hello Rust!")
+///         .translate(Point::new(24, 24))
+///         .style(Style::stroke(Rgb565::RED))
+///         .into_iter(),
+/// );
+///
+/// // Render graphics objects to the screen
+/// display.flush().unwrap();
+/// ```
+///
+/// [`embedded-graphics`]: https://crates.io/crates/embedded-graphics
+/// [`Builder`]: ./struct.Builder.html
 pub struct Ssd1331<SPI, DC> {
     properties: Properties<SPI, DC>,
     buffer: [u8; BUF_SIZE],

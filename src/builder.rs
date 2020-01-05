@@ -1,46 +1,44 @@
-//! Interface factory
-//!
-//! This is the easiest way to create a driver instance. You can set various parameters of the
-//! driver and give it an interface to use. The builder will return an instance of the [`Ssd1331`]
-//! struct bound to the given SPI interface.
-//!
-//! # Examples
-//!
-//! ## Connect to display with default rotation (0 deg)
-//!
-//! ```rust
-//! # use ssd1331::test_helpers::{Spi, Pin};
-//! use ssd1331::Builder;
-//!
-//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
-//! let spi = Spi;
-//! let dc = Pin;
-//!
-//! let display = Builder::new().connect_spi(spi, dc);
-//! ```
-//!
-//! ## Connect to display with rotation of 90 deg
-//!
-//! ```rust
-//! # use ssd1331::test_helpers::{Spi, Pin};
-//! use ssd1331::{DisplayRotation,Builder};
-//!
-//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
-//! let spi = Spi;
-//! let dc = Pin;
-//!
-//! let display = Builder::new().rotation(DisplayRotation::Rotate90).connect_spi(spi, dc);
-//! ```
-//!
-//! [`Ssd1331`]: ../struct.Ssd1331.html
-
 use crate::display::Ssd1331;
 use crate::displayrotation::DisplayRotation;
 use crate::properties::Properties;
 use embedded_hal::blocking::spi;
 use embedded_hal::digital::v2::OutputPin;
 
-/// Builder struct. Driver options and interface are set using its methods.
+/// SSD1331 factory
+///
+/// This is the easiest way to create a driver instance. Configuration parameters such as display
+/// rotation can be set. The builder will be consumed and will return an instance of the [`Ssd1331`]
+/// struct bound to the given SPI interface when `.connect_spi()` is called.
+///
+/// # Examples
+///
+/// ## Connect to display with default rotation (0 deg)
+///
+/// ```rust
+/// # use ssd1331::test_helpers::{Spi, Pin};
+/// use ssd1331::Builder;
+///
+/// // Set up SPI interface and digital pin. These are stub implementations used in examples.
+/// let spi = Spi;
+/// let dc = Pin;
+///
+/// let display = Builder::new().connect_spi(spi, dc);
+/// ```
+///
+/// ## Connect to display with rotation of 90 deg
+///
+/// ```rust
+/// # use ssd1331::test_helpers::{Spi, Pin};
+/// use ssd1331::{DisplayRotation,Builder};
+///
+/// // Set up SPI interface and digital pin. These are stub implementations used in examples.
+/// let spi = Spi;
+/// let dc = Pin;
+///
+/// let display = Builder::new().rotation(DisplayRotation::Rotate90).connect_spi(spi, dc);
+/// ```
+///
+/// [`Ssd1331`]: ../struct.Ssd1331.html
 #[derive(Clone, Copy)]
 pub struct Builder {
     rotation: DisplayRotation,

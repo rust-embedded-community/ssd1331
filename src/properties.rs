@@ -1,11 +1,9 @@
-//! Container to store and set display properties
-
 use crate::command::{AddressIncrementMode, ColorMode, Command, VcomhLevel};
 use crate::displayrotation::DisplayRotation;
 use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 use embedded_hal::digital::v2::OutputPin;
 
-/// Display properties struct
+/// Container to store and set display properties
 pub struct Properties<SPI, DC> {
     spi: SPI,
     dc: DC,
