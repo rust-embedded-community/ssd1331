@@ -20,48 +20,39 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
-use crate::interface::DisplayInterface;
-use crate::mode::displaymode::DisplayModeTrait;
-use crate::properties::DisplayProperties;
+use crate::properties::Properties;
 use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 /// 96px x 64px screen with 16 bits (2 bytes) per pixel
 const BUF_SIZE: usize = 12288;
 
 /// Graphics mode handler
-pub struct GraphicsMode<DI>
-where
-    DI: DisplayInterface,
-{
-    properties: DisplayProperties<DI>,
+pub struct Ssd1331<SPI, DC> {
+    properties: Properties<SPI, DC>,
     buffer: [u8; BUF_SIZE],
 }
 
-impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
+impl<SPI, DC> Ssd1331<SPI, DC>
 where
-    DI: DisplayInterface,
+    SPI: hal::blocking::spi::Write<u8>,
+    DC: OutputPin,
 {
     /// Create new GraphicsMode instance
     ///
     /// Allocates a buffer of 96px * 64px * 16bits = 12,288 bytes. This may be too large for your
     /// hardware, so check your datasheet!
-    fn new(properties: DisplayProperties<DI>) -> Self {
-        GraphicsMode {
+    pub fn new(properties: Properties<SPI, DC>) -> Self {
+        Self {
             properties,
             buffer: [0; BUF_SIZE],
         }
     }
 
     /// Release all resources used by GraphicsMode
-    fn release(self) -> DisplayProperties<DI> {
+    pub fn release(self) -> Properties<SPI, DC> {
         self.properties
     }
-}
 
-impl<DI> GraphicsMode<DI>
-where
-    DI: DisplayInterface,
-{
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
         self.buffer = [0; BUF_SIZE];
@@ -96,7 +87,7 @@ where
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
-        let display_rotation = self.properties.get_rotation();
+        let display_rotation = self.properties.rotation();
 
         let idx = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
@@ -134,8 +125,8 @@ where
     }
 
     /// Get display dimensions, taking into account the current rotation of the display
-    pub fn get_dimensions(&self) -> (u8, u8) {
-        self.properties.get_dimensions()
+    pub fn dimensions(&self) -> (u8, u8) {
+        self.properties.dimensions()
     }
 
     /// Set the display rotation
@@ -155,9 +146,10 @@ use embedded_graphics::{
 };
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<Rgb565> for GraphicsMode<DI>
+impl<SPI, DC> Drawing<Rgb565> for Ssd1331<SPI, DC>
 where
-    DI: DisplayInterface,
+    SPI: hal::blocking::spi::Write<u8>,
+    DC: OutputPin,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where

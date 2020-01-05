@@ -1,6 +1,6 @@
 // Shamefully taken from https://github.com/EdgewaterDevelopment/rust-ssd1331
 
-use super::interface::DisplayInterface;
+use embedded_hal::digital::v2::OutputPin;
 
 /// SSD1331 Commands
 
@@ -52,9 +52,10 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1331
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), ()>
+    pub fn send<SPI, DC>(self, spi: &mut SPI, dc: &mut DC) -> Result<(), ()>
     where
-        DI: DisplayInterface,
+        SPI: hal::blocking::spi::Write<u8>,
+        DC: OutputPin,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
         let (data, len) = match self {
@@ -106,10 +107,11 @@ impl Command {
             Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
         };
 
-        // Send command over the interface
-        iface.send_commands(&data[0..len])?;
+        // Command mode. 1 = data, 0 = command
+        dc.set_low().map_err(|_| ())?;
 
-        Ok(())
+        // Send command over the interface
+        spi.write(&data[0..len]).map_err(|_| ())
     }
 }
 

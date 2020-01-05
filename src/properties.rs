@@ -2,23 +2,26 @@
 
 use crate::command::{AddressIncrementMode, ColorMode, Command, VcomhLevel};
 use crate::displayrotation::DisplayRotation;
-use crate::interface::DisplayInterface;
 use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
+use embedded_hal::digital::v2::OutputPin;
 
 /// Display properties struct
-pub struct DisplayProperties<DI> {
-    iface: DI,
+pub struct Properties<SPI, DC> {
+    spi: SPI,
+    dc: DC,
     display_rotation: DisplayRotation,
 }
 
-impl<DI> DisplayProperties<DI>
+impl<SPI, DC> Properties<SPI, DC>
 where
-    DI: DisplayInterface,
+    SPI: hal::blocking::spi::Write<u8>,
+    DC: OutputPin,
 {
-    /// Create new DisplayProperties instance
-    pub fn new(iface: DI, display_rotation: DisplayRotation) -> DisplayProperties<DI> {
-        DisplayProperties {
-            iface,
+    /// Create new Properties instance
+    pub fn new(spi: SPI, dc: DC, display_rotation: DisplayRotation) -> Self {
+        Properties {
+            spi,
+            dc,
             display_rotation,
         }
     }
@@ -28,21 +31,21 @@ where
     pub fn init_column_mode(&mut self) -> Result<(), ()> {
         let display_rotation = self.display_rotation;
 
-        Command::DisplayOn(false).send(&mut self.iface)?;
-        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
-        Command::Multiplex(64 - 1).send(&mut self.iface)?;
-        Command::DisplayOffset(0).send(&mut self.iface)?;
-        Command::StartLine(0).send(&mut self.iface)?;
+        Command::DisplayOn(false).send(&mut self.spi, &mut self.dc)?;
+        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.spi, &mut self.dc)?;
+        Command::Multiplex(64 - 1).send(&mut self.spi, &mut self.dc)?;
+        Command::DisplayOffset(0).send(&mut self.spi, &mut self.dc)?;
+        Command::StartLine(0).send(&mut self.spi, &mut self.dc)?;
 
         self.set_rotation(display_rotation)?;
 
         // Values taken from [here](https://github.com/adafruit/Adafruit-SSD1331-OLED-Driver-Library-for-Arduino/blob/master/Adafruit_SSD1331.cpp#L119-L124)
-        Command::Contrast(0x91, 0x50, 0x7D).send(&mut self.iface)?;
-        Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
-        Command::VcomhDeselect(VcomhLevel::V071).send(&mut self.iface)?;
-        Command::AllOn(false).send(&mut self.iface)?;
-        Command::Invert(false).send(&mut self.iface)?;
-        Command::DisplayOn(true).send(&mut self.iface)?;
+        Command::Contrast(0x91, 0x50, 0x7D).send(&mut self.spi, &mut self.dc)?;
+        Command::PreChargePeriod(0x1, 0xF).send(&mut self.spi, &mut self.dc)?;
+        Command::VcomhDeselect(VcomhLevel::V071).send(&mut self.spi, &mut self.dc)?;
+        Command::AllOn(false).send(&mut self.spi, &mut self.dc)?;
+        Command::Invert(false).send(&mut self.spi, &mut self.dc)?;
+        Command::DisplayOn(true).send(&mut self.spi, &mut self.dc)?;
 
         Ok(())
     }
@@ -51,8 +54,9 @@ where
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
-        Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
-        Command::RowAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+        Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.spi, &mut self.dc)?;
+        Command::RowAddress(start.1.into(), (end.1 - 1).into())
+            .send(&mut self.spi, &mut self.dc)?;
         Ok(())
     }
 
@@ -60,7 +64,11 @@ where
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
-        self.iface.send_data(buffer)?;
+        // 1 = data, 0 = command
+        self.dc.set_high().map_err(|_| ())?;
+
+        self.spi.write(&buffer).map_err(|_| ())?;
+
         Ok(())
     }
 
@@ -78,7 +86,7 @@ where
     /// #
     /// # let interface = FakeInterface {};
     /// #
-    /// let disp = DisplayProperties::new(
+    /// let disp = Properties::new(
     ///     interface,
     ///     DisplaySize::Display128x64,
     ///     DisplayRotation::Rotate0
@@ -86,14 +94,14 @@ where
     /// assert_eq!(disp.get_dimensions(), (128, 64));
     ///
     /// # let interface = FakeInterface {};
-    /// let rotated_disp = DisplayProperties::new(
+    /// let rotated_disp = Properties::new(
     ///     interface,
     ///     DisplaySize::Display128x64,
     ///     DisplayRotation::Rotate90
     /// );
     /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));
     /// ```
-    pub fn get_dimensions(&self) -> (u8, u8) {
+    pub fn dimensions(&self) -> (u8, u8) {
         match self.display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
                 (DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -105,7 +113,7 @@ where
     }
 
     /// Get the display rotation
-    pub fn get_rotation(&self) -> DisplayRotation {
+    pub fn rotation(&self) -> DisplayRotation {
         self.display_rotation
     }
 
@@ -122,7 +130,7 @@ where
                     ColorMode::CM65k,
                     AddressIncrementMode::Horizontal,
                 )
-                .send(&mut self.iface)?;
+                .send(&mut self.spi, &mut self.dc)?;
             }
             DisplayRotation::Rotate90 => {
                 Command::RemapAndColorDepth(
@@ -131,7 +139,7 @@ where
                     ColorMode::CM65k,
                     AddressIncrementMode::Vertical,
                 )
-                .send(&mut self.iface)?;
+                .send(&mut self.spi, &mut self.dc)?;
             }
             DisplayRotation::Rotate180 => {
                 Command::RemapAndColorDepth(
@@ -140,7 +148,7 @@ where
                     ColorMode::CM65k,
                     AddressIncrementMode::Horizontal,
                 )
-                .send(&mut self.iface)?;
+                .send(&mut self.spi, &mut self.dc)?;
             }
             DisplayRotation::Rotate270 => {
                 Command::RemapAndColorDepth(
@@ -149,7 +157,7 @@ where
                     ColorMode::CM65k,
                     AddressIncrementMode::Vertical,
                 )
-                .send(&mut self.iface)?;
+                .send(&mut self.spi, &mut self.dc)?;
             }
         };
 

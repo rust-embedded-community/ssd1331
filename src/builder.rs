@@ -17,11 +17,9 @@
 //! Builder::new().connect_spi(spi, dc);
 //! ```
 
+use crate::display::Ssd1331;
 use crate::displayrotation::DisplayRotation;
-use crate::interface::SpiInterface;
-use crate::mode::displaymode::DisplayMode;
-use crate::mode::raw::RawMode;
-use crate::properties::DisplayProperties;
+use crate::properties::Properties;
 use embedded_hal::blocking::spi;
 use embedded_hal::digital::v2::OutputPin;
 
@@ -29,12 +27,6 @@ use embedded_hal::digital::v2::OutputPin;
 #[derive(Clone, Copy)]
 pub struct Builder {
     rotation: DisplayRotation,
-}
-
-impl Default for Builder {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl Builder {
@@ -46,21 +38,16 @@ impl Builder {
     }
 
     /// Set the rotation of the display to one of four values. Defaults to no rotation.
-    pub fn with_rotation(&self, rotation: DisplayRotation) -> Self {
+    pub fn rotation(&self, rotation: DisplayRotation) -> Self {
         Self { rotation, ..*self }
     }
 
     /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC>(
-        &self,
-        spi: SPI,
-        dc: DC,
-    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    pub fn connect_spi<SPI, DC>(&self, spi: SPI, dc: DC) -> Ssd1331<SPI, DC>
     where
         SPI: spi::Transfer<u8> + spi::Write<u8>,
         DC: OutputPin,
     {
-        let properties = DisplayProperties::new(SpiInterface::new(spi, dc), self.rotation);
-        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
+        Ssd1331::new(Properties::new(spi, dc, self.rotation))
     }
 }

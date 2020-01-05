@@ -113,7 +113,6 @@
 //! ```
 
 #![no_std]
-// TODO: Docs
 // #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 // #![deny(warnings)]
@@ -132,10 +131,9 @@ const DISPLAY_HEIGHT: u8 = 64;
 
 pub mod builder;
 mod command;
+pub mod display;
 pub mod displayrotation;
-pub mod interface;
-pub mod mode;
-pub mod prelude;
+// pub mod mode;
 pub mod properties;
 
 pub use crate::builder::Builder;
