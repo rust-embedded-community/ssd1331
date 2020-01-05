@@ -72,34 +72,47 @@ where
         Ok(())
     }
 
-    // TODO: Replace (u8, u8) with a dimensioney type for consistency
-    // TOOD: Make doc tests work
     /// Get display dimensions, taking into account the current rotation of the display
     ///
+    ///
+    /// # Examples
+    ///
+    /// ## No rotation
+    ///
     /// ```rust
-    /// # struct FakeInterface;
-    /// #
-    /// # impl DisplayInterface for FakeInterface {
-    /// #     fn send_command(&mut self, cmd: u8) -> Result<(), ()> { Ok(()) }
-    /// #     fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> { Ok(()) }
-    /// # }
-    /// #
-    /// # let interface = FakeInterface {};
-    /// #
-    /// let disp = Properties::new(
-    ///     interface,
-    ///     DisplaySize::Display128x64,
+    /// # use ssd1331::test_helpers::{Spi, Pin, Properties};
+    /// use ssd1331::{DisplayRotation, Builder};
+    ///
+    /// // Set up SPI interface and digital pin. These are stub implementations used in examples.
+    /// let spi = Spi;
+    /// let dc = Pin;
+    ///
+    /// let properties = Properties::new(
+    ///     spi,
+    ///     dc,
     ///     DisplayRotation::Rotate0
     /// );
-    /// assert_eq!(disp.get_dimensions(), (128, 64));
     ///
-    /// # let interface = FakeInterface {};
-    /// let rotated_disp = Properties::new(
-    ///     interface,
-    ///     DisplaySize::Display128x64,
+    /// assert_eq!(properties.dimensions(), (96, 64));
+    /// ```
+    ///
+    /// ## 90 degree rotation rotation
+    ///
+    /// ```rust
+    /// # use ssd1331::test_helpers::{Spi, Pin, Properties};
+    /// use ssd1331::{DisplayRotation, Builder};
+    ///
+    /// // Set up SPI interface and digital pin. These are stub implementations used in examples.
+    /// let spi = Spi;
+    /// let dc = Pin;
+    ///
+    /// let properties = Properties::new(
+    ///     spi,
+    ///     dc,
     ///     DisplayRotation::Rotate90
     /// );
-    /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));
+    ///
+    /// assert_eq!(properties.dimensions(), (64, 96));
     /// ```
     pub fn dimensions(&self) -> (u8, u8) {
         match self.display_rotation {

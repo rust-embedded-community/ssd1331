@@ -1,21 +1,38 @@
 //! Interface factory
 //!
 //! This is the easiest way to create a driver instance. You can set various parameters of the
-//! driver and give it an interface to use. The builder will return a
-//! [`mode::RawMode`](../mode/raw/struct.RawMode.html) object which you should coerce to a richer
-//! display mode, like [mode::Graphics](../mode/graphics/struct.GraphicsMode.html) for drawing
-//! primitives and text.
+//! driver and give it an interface to use. The builder will return an instance of the [`Ssd1331`]
+//! struct bound to the given SPI interface.
 //!
 //! # Examples
 //!
-//! Connect over SPI with default rotation (0 deg) and size (128x64):
+//! ## Connect to display with default rotation (0 deg)
 //!
-//! ```rust,ignore
-//! let spi = /* SPI interface from your HAL of choice */;
-//! let dc = /* GPIO data/command select pin */;
+//! ```rust
+//! # use ssd1331::test_helpers::{Spi, Pin};
+//! use ssd1331::Builder;
 //!
-//! Builder::new().connect_spi(spi, dc);
+//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
+//! let spi = Spi;
+//! let dc = Pin;
+//!
+//! let display = Builder::new().connect_spi(spi, dc);
 //! ```
+//!
+//! ## Connect to display with rotation of 90 deg
+//!
+//! ```rust
+//! # use ssd1331::test_helpers::{Spi, Pin};
+//! use ssd1331::{DisplayRotation,Builder};
+//!
+//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
+//! let spi = Spi;
+//! let dc = Pin;
+//!
+//! let display = Builder::new().rotation(DisplayRotation::Rotate90).connect_spi(spi, dc);
+//! ```
+//!
+//! [`Ssd1331`]: ../struct.Ssd1331.html
 
 use crate::display::Ssd1331;
 use crate::displayrotation::DisplayRotation;

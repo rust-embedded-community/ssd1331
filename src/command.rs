@@ -3,8 +3,6 @@
 use embedded_hal::digital::v2::OutputPin;
 
 /// SSD1331 Commands
-
-/// Commands
 #[derive(Debug)]
 #[allow(dead_code)]
 pub enum Command {
