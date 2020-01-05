@@ -2,6 +2,7 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
 
 use crate::displayrotation::DisplayRotation;
+use crate::error::Error;
 use crate::properties::Properties;
 use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
@@ -80,10 +81,10 @@ pub struct Ssd1331<SPI, DC> {
     buffer: [u8; BUF_SIZE],
 }
 
-impl<SPI, DC> Ssd1331<SPI, DC>
+impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8>,
-    DC: OutputPin,
+    SPI: hal::blocking::spi::Write<u8, Error = CommE>,
+    DC: OutputPin<Error = PinE>,
 {
     /// Create new GraphicsMode instance
     ///
@@ -107,23 +108,26 @@ where
     }
 
     /// Reset display
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), ()>
+    pub fn reset<RST, DELAY>(
+        &mut self,
+        rst: &mut RST,
+        delay: &mut DELAY,
+    ) -> Result<(), Error<CommE, PinE>>
     where
-        RST: OutputPin,
+        RST: OutputPin<Error = PinE>,
         DELAY: DelayMs<u8>,
     {
-        // TODO: Return PinError or however sh1106 does it
-        rst.set_high().map_err(|_| ())?;
+        rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
-        rst.set_low().map_err(|_| ())?;
+        rst.set_low().map_err(Error::Pin)?;
         delay.delay_ms(10);
-        rst.set_high().map_err(|_| ())?;
+        rst.set_high().map_err(Error::Pin)?;
 
         Ok(())
     }
 
     /// Write out data to display
-    pub fn flush(&mut self) -> Result<(), ()> {
+    pub fn flush(&mut self) -> Result<(), Error<CommE, PinE>> {
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
         self.properties
@@ -167,7 +171,7 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) -> Result<(), ()> {
+    pub fn init(&mut self) -> Result<(), Error<CommE, PinE>> {
         self.properties.init_column_mode()?;
         Ok(())
     }
@@ -178,7 +182,7 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), Error<CommE, PinE>> {
         self.properties.set_rotation(rot)
     }
 }

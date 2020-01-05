@@ -1,5 +1,6 @@
 use crate::command::{AddressIncrementMode, ColorMode, Command, VcomhLevel};
 use crate::displayrotation::DisplayRotation;
+use crate::error::Error;
 use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 use embedded_hal::digital::v2::OutputPin;
 
@@ -10,10 +11,10 @@ pub struct Properties<SPI, DC> {
     display_rotation: DisplayRotation,
 }
 
-impl<SPI, DC> Properties<SPI, DC>
+impl<SPI, DC, CommE, PinE> Properties<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8>,
-    DC: OutputPin,
+    SPI: hal::blocking::spi::Write<u8, Error = CommE>,
+    DC: OutputPin<Error = PinE>,
 {
     /// Create new Properties instance
     pub fn new(spi: SPI, dc: DC, display_rotation: DisplayRotation) -> Self {
@@ -26,7 +27,7 @@ where
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init_column_mode(&mut self) -> Result<(), ()> {
+    pub fn init_column_mode(&mut self) -> Result<(), Error<CommE, PinE>> {
         let display_rotation = self.display_rotation;
 
         Command::DisplayOn(false).send(&mut self.spi, &mut self.dc)?;
@@ -51,7 +52,11 @@ where
     /// Set the position in the framebuffer of the display where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
-    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
+    pub fn set_draw_area(
+        &mut self,
+        start: (u8, u8),
+        end: (u8, u8),
+    ) -> Result<(), Error<CommE, PinE>> {
         Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.spi, &mut self.dc)?;
         Command::RowAddress(start.1.into(), (end.1 - 1).into())
             .send(&mut self.spi, &mut self.dc)?;
@@ -61,11 +66,11 @@ where
     /// Send the data to the display for drawing at the current position in the framebuffer
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
-    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
+    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), Error<CommE, PinE>> {
         // 1 = data, 0 = command
-        self.dc.set_high().map_err(|_| ())?;
+        self.dc.set_high().map_err(Error::Pin)?;
 
-        self.spi.write(&buffer).map_err(|_| ())?;
+        self.spi.write(&buffer).map_err(Error::Comm)?;
 
         Ok(())
     }
@@ -128,7 +133,10 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(
+        &mut self,
+        display_rotation: DisplayRotation,
+    ) -> Result<(), Error<CommE, PinE>> {
         self.display_rotation = display_rotation;
 
         match display_rotation {

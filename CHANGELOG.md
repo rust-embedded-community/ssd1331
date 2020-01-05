@@ -9,7 +9,7 @@ Description
 
 ### Added
 
-- None
+- Added `ssd1331::Error` enum with pin (if DC pin fails to set) and communication error (if SPI write fails) variants
 
 ### Changed
 

@@ -1,5 +1,6 @@
 // Shamefully taken from https://github.com/EdgewaterDevelopment/rust-ssd1331
 
+use crate::error::Error;
 use embedded_hal::digital::v2::OutputPin;
 
 /// SSD1331 Commands
@@ -50,10 +51,14 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1331
-    pub fn send<SPI, DC>(self, spi: &mut SPI, dc: &mut DC) -> Result<(), ()>
+    pub fn send<SPI, DC, CommE, PinE>(
+        self,
+        spi: &mut SPI,
+        dc: &mut DC,
+    ) -> Result<(), Error<CommE, PinE>>
     where
-        SPI: hal::blocking::spi::Write<u8>,
-        DC: OutputPin,
+        SPI: hal::blocking::spi::Write<u8, Error = CommE>,
+        DC: OutputPin<Error = PinE>,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
         let (data, len) = match self {
@@ -106,10 +111,10 @@ impl Command {
         };
 
         // Command mode. 1 = data, 0 = command
-        dc.set_low().map_err(|_| ())?;
+        dc.set_low().map_err(Error::Pin)?;
 
         // Send command over the interface
-        spi.write(&data[0..len]).map_err(|_| ())
+        spi.write(&data[0..len]).map_err(Error::Comm)
     }
 }
 

@@ -98,6 +98,7 @@ mod check_readme;
 mod command;
 mod display;
 mod displayrotation;
+mod error;
 mod properties;
 #[doc(hidden)]
 pub mod test_helpers;
@@ -105,3 +106,4 @@ pub mod test_helpers;
 pub use crate::builder::Builder;
 pub use crate::display::Ssd1331;
 pub use crate::displayrotation::DisplayRotation;
+pub use crate::error::Error;
