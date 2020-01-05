@@ -38,6 +38,7 @@ matrix:
     - rust: nightly
 
 install:
+  - pip install linkchecker --user
   - rustup component add rust-src
   - |
       SYSROOT=$(rustc --print sysroot)
