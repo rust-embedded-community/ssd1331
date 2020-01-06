@@ -97,6 +97,40 @@ fn HardFault(ef: &ExceptionFrame) -> ! {
 
 ![Rust rainbow demo image.](readme_pride.jpg?raw=true)
 
+## Migrating from 0.1 to 0.2
+
+The full changelog can be found [here](CHANGELOG.md). A tl;dr version is shown below.
+
+Version 0.1.x
+
+```rust
+use ssd1331::{prelude::*, Builder};
+
+let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+
+disp.reset(&mut rst, &mut delay);
+disp.init().unwrap();
+disp.flush().unwrap();
+
+disp.get_dimensions();
+disp.get_rotation();
+```
+
+Version 0.2.x
+
+```rust
+use ssd1331::{Ssd1331, DisplayRotation};
+
+let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
+
+disp.reset(&mut rst, &mut delay).unwrap();
+disp.init().unwrap();
+disp.flush().unwrap();
+
+disp.dimensions();
+disp.rotation();
+```
+
 ## License
 
 Licensed under either of
