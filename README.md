@@ -26,7 +26,7 @@ You can also export images directly from The GIMP by saving as `.bmp` and choosi
 Load a BMP image of the Rust logo and display it in the center of the display. From
 [`examples/bmp.rs`](examples/bmp.rs):
 
-```rust,no_run
+```rust,ignore
 #![no_std]
 #![no_main]
 
@@ -34,7 +34,7 @@ use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::{geometry::Point, image::ImageBmp, prelude::*};
 use panic_semihosting as _;
-use ssd1331::{Ssd1306, DisplayRotation::Rotate0};
+use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
 use stm32f1xx_hal::delay::Delay;
 use stm32f1xx_hal::prelude::*;
 use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
@@ -103,7 +103,7 @@ The full changelog can be found [here](CHANGELOG.md). A tl;dr version is shown b
 
 Version 0.1.x
 
-```rust
+```rust,ignore
 use ssd1331::{prelude::*, Builder};
 
 let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
@@ -118,7 +118,7 @@ disp.get_rotation();
 
 Version 0.2.x
 
-```rust
+```rust,ignore
 use ssd1331::{Ssd1331, DisplayRotation};
 
 let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
