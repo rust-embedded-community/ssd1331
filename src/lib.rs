@@ -4,9 +4,7 @@
 //! an RGB565 colour space on a canvas of 96x64 pixels and runs over SPI. This driver should work
 //! with any device implementing the [embedded-hal] [`blocking::spi::Write`] trait.
 //!
-//! The [`Builder`] is the recommended way to initialise and start using the display.
-//!
-//! [`embedded-graphics`] is also supported behind the `graphics` feature flag.
+//! [`embedded-graphics`] is also supported behind the `graphics` feature flag (on by default).
 //!
 //! Note that the driver requires at least 12288 bytes (96 x 64 pixels, 16 bits per pixel) of memory
 //! to store the display's framebuffer.
@@ -20,14 +18,14 @@
 //!
 //! ```rust
 //! # use ssd1331::test_helpers::{Spi, Pin};
-//! use ssd1331::Builder;
+//! use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
 //! use embedded_graphics::{prelude::*, pixelcolor::{raw::{RawU16, RawData}, Rgb565}};
 //!
 //! // Set up SPI interface and digital pin. These are stub implementations used in examples.
 //! let spi = Spi;
 //! let dc = Pin;
 //!
-//! let mut display = Builder::new().connect_spi(spi, dc);
+//! let mut display = Ssd1331::new(spi, dc, Rotate0);
 //! display.init();
 //!
 //! // Use raw hex values
@@ -42,14 +40,14 @@
 //!
 //! ```rust
 //! # use ssd1331::test_helpers::{Spi, Pin};
-//! use ssd1331::Builder;
+//! use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
 //! use embedded_graphics::{prelude::*, image::ImageBmp};
 //!
 //! // Set up SPI interface and digital pin. These are stub implementations used in examples.
 //! let spi = Spi;
 //! let dc = Pin;
 //!
-//! let mut display = Builder::new().connect_spi(spi, dc);
+//! let mut display = Ssd1331::new(spi, dc, Rotate0);
 //! display.init();
 //!
 //! let im = ImageBmp::new(include_bytes!("../examples/rust-pride.bmp")).unwrap();
@@ -64,7 +62,7 @@
 //!
 //! # Features
 //!
-//! ## `graphics`
+//! ## `graphics` (enabled by default)
 //!
 //! Enable the `graphics` feature in `Cargo.toml` to get access to features in the
 //! [`embedded-graphics`] crate. This adds the `.draw()` method to the [`Ssd1331`] struct which
@@ -73,7 +71,6 @@
 //! [embedded-hal]: https://docs.rs/embedded-hal
 //! [`blocking::spi::Write`]: https://docs.rs/embedded-hal/0.2.3/embedded_hal/blocking/spi/trait.Write.html
 //! [`Ssd1331`]: ./struct.Ssd1331.html
-//! [`Builder`]: ./struct.Builder.html
 //! [`embedded-graphics`]: https://docs.rs/embedded-graphics
 
 #![no_std]
@@ -93,17 +90,14 @@ extern crate embedded_hal as hal;
 const DISPLAY_WIDTH: u8 = 96;
 const DISPLAY_HEIGHT: u8 = 64;
 
-mod builder;
 mod check_readme;
 mod command;
 mod display;
 mod displayrotation;
 mod error;
-mod properties;
 #[doc(hidden)]
 pub mod test_helpers;
 
-pub use crate::builder::Builder;
 pub use crate::display::Ssd1331;
 pub use crate::displayrotation::DisplayRotation;
 pub use crate::error::Error;

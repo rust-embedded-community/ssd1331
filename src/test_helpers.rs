@@ -5,9 +5,6 @@ use embedded_hal::{
     digital::v2::OutputPin,
 };
 
-// Re-export `Properties` for use in doc tests
-pub use crate::properties::Properties;
-
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub struct Spi;

@@ -26,7 +26,7 @@ use embedded_graphics::{
     fonts::Font6x8, geometry::Point, pixelcolor::Rgb565, prelude::*, text_6x8,
 };
 use panic_semihosting as _;
-use ssd1331::Builder;
+use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 use stm32f1xx_hal::delay::Delay;
 use stm32f1xx_hal::prelude::*;
 use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
@@ -70,7 +70,7 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Builder::new().connect_spi(spi, dc);
+    let mut disp = Ssd1331::new(spi, dc, Rotate0);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
