@@ -7,7 +7,7 @@ use crate::error::Error;
 use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 /// 96px x 64px screen with 16 bits (2 bytes) per pixel
-const BUF_SIZE: usize = 12288;
+const BUF_SIZE: usize = 96 * 64 * 2;
 
 /// SSD1331 display interface
 ///
@@ -140,6 +140,9 @@ where
     }
 
     /// Reset the display
+    ///
+    /// This method brings the RST pin low for 1ms to reset the module,  waits for another 1ms then
+    /// brings RST high
     pub fn reset<RST, DELAY>(
         &mut self,
         rst: &mut RST,
@@ -152,7 +155,7 @@ where
         rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
         rst.set_low().map_err(Error::Pin)?;
-        delay.delay_ms(10);
+        delay.delay_ms(1);
         rst.set_high().map_err(Error::Pin)?;
 
         Ok(())
@@ -164,7 +167,7 @@ where
     pub fn flush(&mut self) -> Result<(), Error<CommE, PinE>> {
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
-        self.set_draw_area((0, 0), (DISPLAY_WIDTH, DISPLAY_HEIGHT))?;
+        self.set_draw_area((0, 0), (DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1))?;
 
         // 1 = data, 0 = command
         self.dc.set_high().map_err(Error::Pin)?;
@@ -180,9 +183,8 @@ where
         start: (u8, u8),
         end: (u8, u8),
     ) -> Result<(), Error<CommE, PinE>> {
-        Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.spi, &mut self.dc)?;
-        Command::RowAddress(start.1.into(), (end.1 - 1).into())
-            .send(&mut self.spi, &mut self.dc)?;
+        Command::ColumnAddress(start.0, end.0).send(&mut self.spi, &mut self.dc)?;
+        Command::RowAddress(start.1.into(), (end.1).into()).send(&mut self.spi, &mut self.dc)?;
         Ok(())
     }
 
@@ -222,10 +224,10 @@ where
         let display_rotation = self.display_rotation;
 
         Command::DisplayOn(false).send(&mut self.spi, &mut self.dc)?;
-        Command::DisplayClockDiv(0x8, 0x0).send(&mut self.spi, &mut self.dc)?;
-        Command::Multiplex(64 - 1).send(&mut self.spi, &mut self.dc)?;
-        Command::DisplayOffset(0).send(&mut self.spi, &mut self.dc)?;
+        Command::DisplayClockDiv(0xF, 0x0).send(&mut self.spi, &mut self.dc)?;
+        Command::Multiplex(DISPLAY_HEIGHT - 1).send(&mut self.spi, &mut self.dc)?;
         Command::StartLine(0).send(&mut self.spi, &mut self.dc)?;
+        Command::DisplayOffset(0).send(&mut self.spi, &mut self.dc)?;
 
         self.set_rotation(display_rotation)?;
 
