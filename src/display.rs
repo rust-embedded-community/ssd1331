@@ -1,10 +1,11 @@
-use hal::blocking::delay::DelayMs;
-use hal::digital::v2::OutputPin;
+use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
 
-use crate::command::{AddressIncrementMode, ColorMode, Command, VcomhLevel};
-use crate::displayrotation::DisplayRotation;
-use crate::error::Error;
-use crate::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
+use crate::{
+    command::{AddressIncrementMode, ColorMode, Command, VcomhLevel},
+    displayrotation::DisplayRotation,
+    error::Error,
+    DISPLAY_HEIGHT, DISPLAY_WIDTH,
+};
 
 /// 96px x 64px screen with 16 bits (2 bytes) per pixel
 const BUF_SIZE: usize = 96 * 64 * 2;
@@ -18,16 +19,16 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// This requires the `graphics` feature to be enabled (on by default).
 ///
 /// ```rust
-/// use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
 /// use embedded_graphics::{
-///     prelude::*,
 ///     fonts::Font6x8,
 ///     geometry::Point,
 ///     image::ImageLE,
 ///     pixelcolor::Rgb565,
+///     prelude::*,
 ///     primitives::{Circle, Line, Rectangle},
 ///     Drawing,
 /// };
+/// use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 /// # use ssd1331::test_helpers::{Pin, Spi};
 ///
 /// // Set up SPI interface and digital pin. These are stub implementations used in examples.
@@ -106,7 +107,7 @@ where
     ///
     /// ```rust
     /// # use ssd1331::test_helpers::{Pin, Spi};
-    /// use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
+    /// use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
     ///
     /// // Set up SPI interface and digital pin. These are stub implementations used in examples.
     /// let spi = Spi;
@@ -256,11 +257,7 @@ where
     /// let spi = Spi;
     /// let dc = Pin;
     ///
-    /// let display = Ssd1331::new(
-    ///     spi,
-    ///     dc,
-    ///     DisplayRotation::Rotate0
-    /// );
+    /// let display = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
     ///
     /// assert_eq!(display.dimensions(), (96, 64));
     /// ```
@@ -275,11 +272,7 @@ where
     /// let spi = Spi;
     /// let dc = Pin;
     ///
-    /// let display = Ssd1331::new(
-    ///     spi,
-    ///     dc,
-    ///     DisplayRotation::Rotate90
-    /// );
+    /// let display = Ssd1331::new(spi, dc, DisplayRotation::Rotate90);
     ///
     /// assert_eq!(display.dimensions(), (64, 96));
     /// ```

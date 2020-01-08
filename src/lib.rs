@@ -18,8 +18,14 @@
 //!
 //! ```rust
 //! # use ssd1331::test_helpers::{Spi, Pin};
-//! use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
-//! use embedded_graphics::{prelude::*, pixelcolor::{raw::{RawU16, RawData}, Rgb565}};
+//! use embedded_graphics::{
+//!     pixelcolor::{
+//!         raw::{RawData, RawU16},
+//!         Rgb565,
+//!     },
+//!     prelude::*,
+//! };
+//! use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 //!
 //! // Set up SPI interface and digital pin. These are stub implementations used in examples.
 //! let spi = Spi;
@@ -40,8 +46,8 @@
 //!
 //! ```rust
 //! # use ssd1331::test_helpers::{Spi, Pin};
-//! use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
-//! use embedded_graphics::{prelude::*, image::ImageBmp};
+//! use embedded_graphics::{image::ImageBmp, prelude::*};
+//! use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 //!
 //! // Set up SPI interface and digital pin. These are stub implementations used in examples.
 //! let spi = Spi;
@@ -98,6 +104,4 @@ mod error;
 #[doc(hidden)]
 pub mod test_helpers;
 
-pub use crate::display::Ssd1331;
-pub use crate::displayrotation::DisplayRotation;
-pub use crate::error::Error;
+pub use crate::{display::Ssd1331, displayrotation::DisplayRotation, error::Error};

@@ -22,15 +22,16 @@
 #![no_std]
 #![no_main]
 
-use cortex_m_rt::ExceptionFrame;
-use cortex_m_rt::{entry, exception};
+use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{geometry::Point, image::ImageBmp, prelude::*};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
-use stm32f1xx_hal::delay::Delay;
-use stm32f1xx_hal::prelude::*;
-use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
-use stm32f1xx_hal::stm32;
+use stm32f1xx_hal::{
+    delay::Delay,
+    prelude::*,
+    spi::{Mode, Phase, Polarity, Spi},
+    stm32,
+};
 
 #[entry]
 fn main() -> ! {
