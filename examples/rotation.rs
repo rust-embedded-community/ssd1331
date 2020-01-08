@@ -27,7 +27,7 @@
 
 use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
-use embedded_graphics::prelude::*;
+use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::delay::Delay;

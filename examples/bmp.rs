@@ -26,7 +26,7 @@ use cortex_m_rt::ExceptionFrame;
 use cortex_m_rt::{entry, exception};
 use embedded_graphics::{geometry::Point, image::ImageBmp, prelude::*};
 use panic_semihosting as _;
-use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
+use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::delay::Delay;
 use stm32f1xx_hal::prelude::*;
 use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
@@ -70,15 +70,21 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 
+    let (w, h) = disp.dimensions();
+
     let im = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
 
-    let moved = im.translate(Point::new((96 - im.width() as i32) / 2, 0));
+    // Position image in the center of the display
+    let moved = im.translate(Point::new(
+        (w as u32 - im.width()) as i32 / 2,
+        (h as u32 - im.height()) as i32 / 2,
+    ));
 
     disp.draw(moved.into_iter());
 
