@@ -72,15 +72,21 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let im = ImageBmp::new(include_bytes!("../examples/rust-pride.bmp")).unwrap();
+    let (w, h) = disp.dimensions();
 
-    let moved = im.translate(Point::new((96 - im.width() as i32) / 2, 0));
+    let im = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+
+    // Position image in the center of the display
+    let moved = im.translate(Point::new(
+        (w as u32 - im.width()) as i32 / 2,
+        (h as u32 - im.height()) as i32 / 2,
+    ));
 
     disp.draw(moved.into_iter());
 
