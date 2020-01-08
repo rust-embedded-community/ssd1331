@@ -21,19 +21,15 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
-use cortex_m_rt::ExceptionFrame;
-use cortex_m_rt::{entry, exception};
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
-use hal::stm32;
-use ssd1331::prelude::*;
-use ssd1331::Builder;
+use cortex_m_rt::{entry, exception, ExceptionFrame};
+use panic_semihosting as _;
+use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
+use stm32f1xx_hal::{
+    delay::Delay,
+    prelude::*,
+    spi::{Mode, Phase, Polarity, Spi},
+    stm32,
+};
 
 #[entry]
 fn main() -> ! {
@@ -73,9 +69,9 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut disp = Ssd1331::new(spi, dc, Rotate0);
 
-    disp.reset(&mut rst, &mut delay);
+    disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 

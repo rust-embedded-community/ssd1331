@@ -25,22 +25,16 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
-use cortex_m_rt::ExceptionFrame;
-use cortex_m_rt::{entry, exception};
-use embedded_graphics::image::Image1BPP;
-use embedded_graphics::pixelcolor::PixelColorU16;
-use embedded_graphics::prelude::*;
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
-use hal::stm32;
-use ssd1331::prelude::*;
-use ssd1331::Builder;
+use cortex_m_rt::{entry, exception, ExceptionFrame};
+use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
+use panic_semihosting as _;
+use ssd1331::{DisplayRotation, Ssd1331};
+use stm32f1xx_hal::{
+    delay::Delay,
+    prelude::*,
+    spi::{Mode, Phase, Polarity, Spi},
+    stm32,
+};
 
 #[entry]
 fn main() -> ! {
@@ -80,30 +74,22 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new()
-        // Set initial rotation at 90 degrees clockwise
-        .with_rotation(DisplayRotation::Rotate90)
-        .connect_spi(spi, dc)
-        .into();
+    // Initialise the display with a default rotation of 90 degrees
+    let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate90);
 
-    disp.reset(&mut rst, &mut delay);
+    disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    // Contrived example to test builder and instance methods. Sets rotation to 270 degress
-    // or 90 degress counterclockwise
+    // Set a new rotation of 270 degrees
     disp.set_rotation(DisplayRotation::Rotate270).unwrap();
 
-    let (w, h) = disp.get_dimensions();
+    // Load a 1BPP 64x64px image with LE (Little Endian) encoding of the Rust logo, white foreground
+    // black background
+    let im = ImageLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64, 64);
 
-    let im = Image1BPP::new(include_bytes!("./rust.raw"), 64, 64);
-    // .translate(Coord::new(w as i32 / 2 - 64 / 2, h as i32 / 2 - 64 / 2));
-
-    // Map 0x00 or 0x01 to 0x0000 or 0xffff to draw a white Rust logo from a 1BPP image
-    disp.draw(
-        im.into_iter()
-            .map(|p: Pixel<u8>| Pixel::<PixelColorU16>(p.0, (p.1 as u16 * 0xffff).into())),
-    );
+    // Map on/off image colours to Rgb565::BLACK/Rgb565::WHITE
+    disp.draw(im.into_iter().map(|p| Pixel(p.0, p.1.into())));
 
     disp.flush().unwrap();
 

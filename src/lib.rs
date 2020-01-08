@@ -1,119 +1,85 @@
 //! SSD1331 OLED display driver
 //!
-//! The driver must be initialised by passing an  SPI interface peripheral to the [`Builder`],
-//! which will in turn create a driver instance in a particular mode. By default, the builder
-//! returns a [`mode::RawMode`] instance which isn't very useful by itself. You can coerce the driver
-//! into a more useful mode by calling `into()` and defining the type you want to coerce to. For
-//! example, to initialise the display with an I2CSPI interface and [mode::GraphicsMode], you would do
-//! something like this:
+//! This crate is an SPI-based driver for the popular SSD1331 colour OLED display. This display uses
+//! an RGB565 colour space on a canvas of 96x64 pixels and runs over SPI. This driver should work
+//! with any device implementing the [embedded-hal] [`blocking::spi::Write`] trait.
 //!
-//! ```rust,ignore
-//! let spi = Spi::spi1(/* snip */);
+//! [`embedded-graphics`] is also supported behind the `graphics` feature flag (on by default).
 //!
-//! let mut disp: GraphicsMode<_> = Builder::new().connect_spi(dc, spi).into();
-//! disp.init();
-//!
-//! disp.set_pixel(10, 20, 1);
-//! ```
-//!
-//! See the [example](https://github.com/jamwaffles/ssd1331/blob/master/examples/graphics.rs)
-//! for more usage. The [entire `embedded_graphics` featureset](https://github.com/jamwaffles/embedded-graphics#features)
-//! is supported by this driver.
-//!
-//! It's possible to customise the driver to suit your display/application. Take a look at the
-//! [Builder] for available options.
+//! Note that the driver requires at least 12288 bytes (96 x 64 pixels, 16 bits per pixel) of memory
+//! to store the display's framebuffer.
 //!
 //! # Examples
 //!
-//! Examples can be found in
+//! Full examples can be found in
 //! [the examples/ folder](https://github.com/jamwaffles/ssd1331/blob/master/examples)
 //!
-//! ## Draw some text to the display
+//! ## Set individual pixels with `.set_pixel()`
 //!
-//! Uses [mode::GraphicsMode] and [embedded_graphics](../embedded_graphics/index.html).
+//! ```rust
+//! # use ssd1331::test_helpers::{Spi, Pin};
+//! use embedded_graphics::{
+//!     pixelcolor::{
+//!         raw::{RawData, RawU16},
+//!         Rgb565,
+//!     },
+//!     prelude::*,
+//! };
+//! use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 //!
-//! ```rust,no-run
-//! #![no_std]
-//! #![no_main]
+//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
+//! let spi = Spi;
+//! let dc = Pin;
 //!
-//! extern crate cortex_m;
-//! extern crate cortex_m_rt as rt;
-//! extern crate panic_semihosting;
-//! extern crate stm32f1xx_hal as hal;
+//! let mut display = Ssd1331::new(spi, dc, Rotate0);
+//! display.init();
 //!
-//! use cortex_m_rt::ExceptionFrame;
-//! use cortex_m_rt::{entry, exception};
-//! use embedded_graphics::fonts::Font6x8;
-//! use embedded_graphics::prelude::*;
-//! use hal::i2c::{BlockingI2c, DutyCycle, Mode};
-//! use hal::prelude::*;
-//! use hal::stm32;
-//! use ssd1331::prelude::*;
-//! use ssd1331::Builder;
+//! // Use raw hex values
+//! display.set_pixel(10, 20, 0xf00);
+//! // Or embedded-graphics' `Rgb565` if the `graphics` feature is enabled
+//! display.set_pixel(10, 30, RawU16::from(Rgb565::new(255, 127, 0)).into_inner());
 //!
-//! #[entry]
-//! fn main() -> ! {
-//!     let cp = cortex_m::Peripherals::take().unwrap();
-//!     let dp = stm32::Peripherals::take().unwrap();
-//!
-//!     let mut flash = dp.FLASH.constrain();
-//!     let mut rcc = dp.RCC.constrain();
-//!
-//!     let clocks = rcc.cfgr.freeze(&mut flash.acr);
-//!
-//!     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
-//!
-//!     let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
-//!     let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
-//!
-//!     // SPI1
-//!     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
-//!     let miso = gpioa.pa6;
-//!     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
-//!
-//!     let mut delay = Delay::new(cp.SYST, clocks);
-//!
-//!     let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
-//!     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
-//!
-//!     let spi = Spi::spi1(
-//!         dp.SPI1,
-//!         (sck, miso, mosi),
-//!         &mut afio.mapr,
-//!         Mode {
-//!             polarity: Polarity::IdleLow,
-//!             phase: Phase::CaptureOnFirstTransition,
-//!         },
-//!         8.mhz(),
-//!         clocks,
-//!         &mut rcc.apb2,
-//!     );
-//!
-//!     let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-//!
-//!     disp.init().unwrap();
-//!     disp.flush().unwrap();
-//!
-//!     disp.draw(
-//!         Font6x8::render_str("Hello world!")
-//!             .with_stroke(Some(1u8.into()))
-//!             .into_iter(),
-//!     );
-//!     disp.draw(
-//!         Font6x8::render_str("Hello Rust!")
-//!             .with_stroke(Some(1u8.into()))
-//!             .translate(Coord::new(0, 16))
-//!             .into_iter(),
-//!     );
-//!
-//!     disp.flush().unwrap();
-//!
-//!     loop {}
-//! }
+//! display.flush();
 //! ```
+//!
+//! ## Render a rainbow Rust logo
+//!
+//! ```rust
+//! # use ssd1331::test_helpers::{Spi, Pin};
+//! use embedded_graphics::{image::ImageBmp, prelude::*};
+//! use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
+//!
+//! // Set up SPI interface and digital pin. These are stub implementations used in examples.
+//! let spi = Spi;
+//! let dc = Pin;
+//!
+//! let mut display = Ssd1331::new(spi, dc, Rotate0);
+//! display.init();
+//!
+//! let im = ImageBmp::new(include_bytes!("../examples/rust-pride.bmp")).unwrap();
+//!
+//! // Center the image on the display
+//! let moved = im.translate(Point::new((96 - im.width() as i32) / 2, 0));
+//!
+//! display.draw(moved.into_iter());
+//!
+//! display.flush().unwrap();
+//! ```
+//!
+//! # Features
+//!
+//! ## `graphics` (enabled by default)
+//!
+//! Enable the `graphics` feature in `Cargo.toml` to get access to features in the
+//! [`embedded-graphics`] crate. This adds the `.draw()` method to the [`Ssd1331`] struct which
+//! accepts any `embedded-graphics` compatible item.
+//!
+//! [embedded-hal]: https://docs.rs/embedded-hal
+//! [`blocking::spi::Write`]: https://docs.rs/embedded-hal/0.2.3/embedded_hal/blocking/spi/trait.Write.html
+//! [`Ssd1331`]: ./struct.Ssd1331.html
+//! [`embedded-graphics`]: https://docs.rs/embedded-graphics
 
 #![no_std]
-// TODO: Docs
 // #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 // #![deny(warnings)]
@@ -130,12 +96,12 @@ extern crate embedded_hal as hal;
 const DISPLAY_WIDTH: u8 = 96;
 const DISPLAY_HEIGHT: u8 = 64;
 
-pub mod builder;
+mod check_readme;
 mod command;
-pub mod displayrotation;
-pub mod interface;
-pub mod mode;
-pub mod prelude;
-pub mod properties;
+mod display;
+mod displayrotation;
+mod error;
+#[doc(hidden)]
+pub mod test_helpers;
 
-pub use crate::builder::Builder;
+pub use crate::{display::Ssd1331, displayrotation::DisplayRotation, error::Error};

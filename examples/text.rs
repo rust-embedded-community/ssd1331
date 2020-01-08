@@ -20,21 +20,18 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate panic_semihosting;
-extern crate stm32f1xx_hal as hal;
-
-use cortex_m_rt::ExceptionFrame;
-use cortex_m_rt::{entry, exception};
-use embedded_graphics::fonts::Font6x8;
-use embedded_graphics::prelude::*;
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::spi::{Mode, Phase, Polarity, Spi};
-use hal::stm32;
-use ssd1331::prelude::*;
-use ssd1331::Builder;
+use cortex_m_rt::{entry, exception, ExceptionFrame};
+use embedded_graphics::{
+    fonts::Font6x8, geometry::Point, pixelcolor::Rgb565, prelude::*, text_6x8,
+};
+use panic_semihosting as _;
+use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
+use stm32f1xx_hal::{
+    delay::Delay,
+    prelude::*,
+    spi::{Mode, Phase, Polarity, Spi},
+    stm32,
+};
 
 #[entry]
 fn main() -> ! {
@@ -74,26 +71,35 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut disp = Ssd1331::new(spi, dc, Rotate0);
 
-    disp.reset(&mut rst, &mut delay);
+    disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let white: u16 = 0xffff;
-    // Red with a bit of green equals orange
-    let rust: u16 = 0b11111_000111_00000;
+    // Red with a small amount of green creates a deep orange colour
+    let rust = Rgb565::new(0xff, 0x07, 0x00);
 
     disp.draw(
         Font6x8::render_str("Hello world!")
-            .with_stroke(Some(white.into()))
+            .stroke(Some(Rgb565::WHITE))
             .into_iter(),
     );
     disp.draw(
         Font6x8::render_str("Hello Rust!")
-            .with_stroke(Some(rust.into()))
-            .translate(Coord::new(0, 16))
+            .stroke(Some(rust))
+            .translate(Point::new(0, 16))
             .into_iter(),
+    );
+
+    // Macros can also be used
+    disp.draw(
+        text_6x8!(
+            "Hello macros!",
+            stroke = Some(Rgb565::RED),
+            fill = Some(Rgb565::GREEN)
+        )
+        .translate(Point::new(0, 24)),
     );
 
     disp.flush().unwrap();

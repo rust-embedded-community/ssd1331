@@ -1,10 +1,9 @@
 // Shamefully taken from https://github.com/EdgewaterDevelopment/rust-ssd1331
 
-use super::interface::DisplayInterface;
+use crate::error::Error;
+use embedded_hal::digital::v2::OutputPin;
 
 /// SSD1331 Commands
-
-/// Commands
 #[derive(Debug)]
 #[allow(dead_code)]
 pub enum Command {
@@ -52,19 +51,25 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1331
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), ()>
+    pub fn send<SPI, DC, CommE, PinE>(
+        self,
+        spi: &mut SPI,
+        dc: &mut DC,
+    ) -> Result<(), Error<CommE, PinE>>
     where
-        DI: DisplayInterface,
+        SPI: hal::blocking::spi::Write<u8, Error = CommE>,
+        DC: OutputPin<Error = PinE>,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
         let (data, len) = match self {
             Command::Contrast(a, b, c) => ([0x81, a, 0x82, b, 0x83, c, 0], 6),
-            Command::AllOn(on) => ([0xA4 | (on as u8), 0, 0, 0, 0, 0, 0], 1),
+            // TODO: Collapse AllOn and Invert commands into new DisplayMode cmd with enum
+            Command::AllOn(on) => ([if on { 0xA5 } else { 0xA6 }, 0, 0, 0, 0, 0, 0], 1),
             Command::Invert(inv) => ([if inv { 0xA7 } else { 0xA4 }, 0, 0, 0, 0, 0, 0], 1),
             Command::DisplayOn(on) => ([0xAE | (on as u8), 0, 0, 0, 0, 0, 0], 1),
             Command::ColumnAddress(start, end) => ([0x15, start, end, 0, 0, 0, 0], 3),
             Command::RowAddress(start, end) => ([0x75, start, end, 0, 0, 0, 0], 3),
-            Command::StartLine(line) => ([0xA1 | (0x3F & line), 0, 0, 0, 0, 0, 0], 1),
+            Command::StartLine(line) => ([0xA1, (0x3F & line), 0, 0, 0, 0, 0], 2),
             Command::RemapAndColorDepth(hremap, vremap, cmode, addr_inc_mode) => (
                 [
                     0xA0,
@@ -82,7 +87,7 @@ impl Command {
             ),
             Command::Multiplex(ratio) => ([0xA8, ratio, 0, 0, 0, 0, 0], 2),
             Command::ReverseComDir(rev) => ([0xC0 | ((rev as u8) << 3), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOffset(offset) => ([0xD3, offset, 0, 0, 0, 0, 0], 2),
+            Command::DisplayOffset(offset) => ([0xA2, offset, 0, 0, 0, 0, 0], 2),
             Command::ComPinConfig(alt, lr) => (
                 [
                     0xDA,
@@ -106,10 +111,11 @@ impl Command {
             Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
         };
 
-        // Send command over the interface
-        iface.send_commands(&data[0..len])?;
+        // Command mode. 1 = data, 0 = command
+        dc.set_low().map_err(Error::Pin)?;
 
-        Ok(())
+        // Send command over the interface
+        spi.write(&data[0..len]).map_err(Error::Comm)
     }
 }
 
