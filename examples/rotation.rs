@@ -83,19 +83,12 @@ fn main() -> ! {
     // Set a new rotation of 270 degrees
     disp.set_rotation(DisplayRotation::Rotate270).unwrap();
 
-    // let (w, h) = disp.get_dimensions();
-
     // Load a 1BPP 64x64px image with LE (Little Endian) encoding of the Rust logo, white foreground
     // black background
-    let im = ImageLE::new(include_bytes!("./rust.raw"), 64, 64);
+    let im = ImageLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64, 64);
 
-    // Map 0x00 or 0x01 to 0x0000 or 0xffff to draw a white Rust logo from a 1BPP image
-    // disp.draw(
-    //     im.into_iter()
-    //         .map(|p: Pixel<u8>| Pixel::<PixelColorU16>(p.0, (p.1 as u16 * 0xffff).into())),
-    // );
-
-    disp.draw(&im);
+    // Map on/off image colours to Rgb565::BLACK/Rgb565::WHITE
+    disp.draw(im.into_iter().map(|p| Pixel(p.0, p.1.into())));
 
     disp.flush().unwrap();
 
