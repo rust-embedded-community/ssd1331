@@ -1,8 +1,7 @@
 //! Draw a square, circle and triangle on the screen using the embedded_graphics library over a 4
 //! wire SPI interface.
 //!
-//! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
-//! SPI1.
+//! This example is for the STM32F411 Nucleo development board.
 //!
 //! Wiring connections are as follows
 //!
@@ -15,7 +14,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example graphics`.
+//! Run it with `cargo run --example graphics`.
 
 #![no_std]
 #![no_main]
@@ -29,55 +28,57 @@ use embedded_graphics::{
     primitives::{Circle, Line, Rectangle, Triangle},
 };
 use panic_semihosting as _;
-use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
-use stm32f1xx_hal::delay::Delay;
-use stm32f1xx_hal::prelude::*;
-use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
-use stm32f1xx_hal::stm32;
+use ssd1331::{DisplayRotation, Ssd1331};
+use stm32f4xx_hal::delay::Delay;
+use stm32f4xx_hal::prelude::*;
+use stm32f4xx_hal::spi::{Mode, NoMiso, Phase, Polarity, Spi};
+use stm32f4xx_hal::stm32;
 
 #[entry]
 fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let dp = stm32::Peripherals::take().unwrap();
 
-    let mut flash = dp.FLASH.constrain();
-    let mut rcc = dp.RCC.constrain();
+    // Set up the system clock to 48MHz
+    let rcc = dp.RCC.constrain();
+    let clocks = rcc.cfgr.sysclk(48.mhz()).freeze();
 
-    let clocks = rcc.cfgr.freeze(&mut flash.acr);
-
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
-
-    let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpiob = dp.GPIOB.split();
 
     // SPI1
-    let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
-    let miso = gpioa.pa6;
-    let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
+    let sck = gpiob.pb3.into_alternate_af5();
+    let mosi = gpiob.pb5.into_alternate_af5();
 
     let mut delay = Delay::new(cp.SYST, clocks);
 
-    let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
-    let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
+    let mut rst = gpiob.pb10.into_push_pull_output();
+    let mut dc = gpiob.pb6.into_push_pull_output();
 
     let spi = Spi::spi1(
         dp.SPI1,
-        (sck, miso, mosi),
-        &mut afio.mapr,
+        (sck, NoMiso, mosi),
         Mode {
             polarity: Polarity::IdleLow,
             phase: Phase::CaptureOnFirstTransition,
         },
-        8.mhz(),
+        1.mhz().into(),
         clocks,
-        &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
 
     disp.reset(&mut rst, &mut delay).unwrap();
     disp.init().unwrap();
     disp.flush().unwrap();
+
+    let (w, h) = disp.dimensions();
+
+    // Border
+    disp.draw(
+        Rectangle::new(Point::new(0, 0), Point::new(w as i32 - 1, h as i32 - 1))
+            .stroke(Some(Rgb565::WHITE))
+            .into_iter(),
+    );
 
     disp.draw(
         Triangle::new(
@@ -104,9 +105,4 @@ fn main() -> ! {
     disp.flush().unwrap();
 
     loop {}
-}
-
-#[exception]
-fn HardFault(ef: &ExceptionFrame) -> ! {
-    panic!("{:#?}", ef);
 }
