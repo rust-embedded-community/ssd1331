@@ -340,38 +340,37 @@ where
 }
 
 #[cfg(feature = "graphics")]
+use core::convert::TryInto;
+#[cfg(feature = "graphics")]
 use embedded_graphics::{
     drawable,
+    geometry::Size,
     pixelcolor::{
         raw::{RawData, RawU16},
         Rgb565,
     },
-    Drawing,
+    DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
-impl<SPI, DC> Drawing<Rgb565> for Ssd1331<SPI, DC>
+impl<SPI, DC> DrawTarget<Rgb565> for Ssd1331<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = drawable::Pixel<Rgb565>>,
-    {
-        // Filter out pixels that are off the top left of the screen
-        let on_screen_pixels = item_pixels
-            .into_iter()
-            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) {
+        let drawable::Pixel(pos, color) = pixel;
 
-        for drawable::Pixel(point, color) in on_screen_pixels {
-            // NOTE: The filter above means the coordinate conversions from `i32` to `u32` should
-            // never error.
-            self.set_pixel(
-                point.x as u32,
-                point.y as u32,
-                RawU16::from(color).into_inner(),
-            );
-        }
+        self.set_pixel(
+            (pos.x).try_into().unwrap(),
+            (pos.y).try_into().unwrap(),
+            RawU16::from(color).into_inner(),
+        );
+    }
+
+    fn size(&self) -> Size {
+        let (w, h) = self.dimensions();
+
+        Size::new(w as u32, h as u32)
     }
 }
