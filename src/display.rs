@@ -20,13 +20,13 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     fonts::{Text, Font6x8},
+///     fonts::{Font6x8, Text},
 ///     geometry::Point,
 ///     image::ImageLE,
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     primitives::{Circle, Line, Rectangle},
-/// style::{PrimitiveStyleBuilder, TextStyleBuilder}
+///     style::{PrimitiveStyleBuilder, TextStyleBuilder},
 /// };
 /// use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 /// # use ssd1331::test_helpers::{Pin, Spi};
@@ -42,26 +42,42 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// display.init().unwrap();
 /// display.flush().unwrap();
 ///
-///     Line::new(Point::new(0, 0), Point::new(16, 16))
-///         .into_styled(PrimitiveStyleBuilder::new().stroke_color(Rgb565::RED)
-///         .stroke_width(1).build())
-///         .draw(&mut display);
+/// Line::new(Point::new(0, 0), Point::new(16, 16))
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::RED)
+///             .stroke_width(1)
+///             .build(),
+///     )
+///     .draw(&mut display);
 ///
-///     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
-///         .into_styled(PrimitiveStyleBuilder::new().stroke_color(Rgb565::new(255, 127, 0))
-///         .stroke_width(1).build())
-///         .draw(&mut display);
+/// Rectangle::new(Point::new(24, 0), Point::new(40, 16))
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::new(255, 127, 0))
+///             .stroke_width(1)
+///             .build(),
+///     )
+///     .draw(&mut display);
 ///
-///     Circle::new(Point::new(64, 8), 8)
-///         .into_styled(PrimitiveStyleBuilder::new().stroke_color(Rgb565::GREEN)
-///         .stroke_width(1).build())
-///         .draw(&mut display);
+/// Circle::new(Point::new(64, 8), 8)
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::GREEN)
+///             .stroke_width(1)
+///             .build(),
+///     )
+///     .draw(&mut display);
 ///
 /// image.draw(&mut display);
 ///
-///     Text::new("Hello Rust!", Point::new(24, 24))
-/// .into_styled(TextStyleBuilder::new(Font6x8).text_color(Rgb565::RED).build())
-///         .draw(&mut display);
+/// Text::new("Hello Rust!", Point::new(24, 24))
+///     .into_styled(
+///         TextStyleBuilder::new(Font6x8)
+///             .text_color(Rgb565::RED)
+///             .build(),
+///     )
+///     .draw(&mut display);
 ///
 /// // Render graphics objects to the screen
 /// display.flush().unwrap();
