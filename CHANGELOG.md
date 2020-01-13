@@ -5,15 +5,13 @@
 
 ## Unreleased
 
-- None
-
 ### Added
 
 - None
 
 ### Changed
 
-- None
+- **(breaking)** Upgraded to embedded-graphics 0.6.0-alpha.3
 
 ### Fixed
 
