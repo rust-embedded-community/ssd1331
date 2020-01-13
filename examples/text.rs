@@ -22,7 +22,13 @@
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
-    fonts::Font6x8, geometry::Point, pixelcolor::Rgb565, prelude::*, text_6x8,
+    egtext,
+    fonts::{Font6x8, Text},
+    geometry::Point,
+    pixelcolor::Rgb565,
+    prelude::*,
+    style::TextStyleBuilder,
+    text_style,
 };
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
@@ -80,27 +86,30 @@ fn main() -> ! {
     // Red with a small amount of green creates a deep orange colour
     let rust = Rgb565::new(0xff, 0x07, 0x00);
 
-    disp.draw(
-        Font6x8::render_str("Hello world!")
-            .stroke(Some(Rgb565::WHITE))
-            .into_iter(),
-    );
-    disp.draw(
-        Font6x8::render_str("Hello Rust!")
-            .stroke(Some(rust))
-            .translate(Point::new(0, 16))
-            .into_iter(),
-    );
+    Text::new("Hello world!", Point::zero())
+        .into_styled(
+            TextStyleBuilder::new(Font6x8)
+                .text_color(Rgb565::WHITE)
+                .build(),
+        )
+        .draw(&mut disp);
+
+    Text::new("Hello Rust!", Point::new(0, 16))
+        .into_styled(TextStyleBuilder::new(Font6x8).text_color(rust).build())
+        .draw(&mut disp);
 
     // Macros can also be used
-    disp.draw(
-        text_6x8!(
-            "Hello macros!",
-            stroke = Some(Rgb565::RED),
-            fill = Some(Rgb565::GREEN)
+    egtext!(
+        text = "Hello macros!",
+        top_left = (0, 0),
+        style = text_style!(
+            font = Font6x8,
+            text_color = Rgb565::RED,
+            background_color = Rgb565::GREEN
         )
-        .translate(Point::new(0, 24)),
-    );
+    )
+    .translate(Point::new(0, 24))
+    .draw(&mut disp);
 
     disp.flush().unwrap();
 
