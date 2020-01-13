@@ -25,6 +25,7 @@ fi
 
 # Remove stale docs - the linkchecker might miss links to old files if they're not removed
 cargo clean --doc
+cargo clean --doc --target $TARGET
 
 cargo doc --all-features --target $TARGET
 
