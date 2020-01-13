@@ -61,7 +61,7 @@
 //! // Center the image on the display
 //! let moved = im.translate(Point::new((96 - im.width() as i32) / 2, 0));
 //!
-//! display.draw(moved.into_iter());
+//! moved.draw(&mut display);
 //!
 //! display.flush().unwrap();
 //! ```

@@ -87,7 +87,7 @@ fn main() -> ! {
         (h as u32 - im.height()) as i32 / 2,
     ));
 
-    disp.draw(moved.into_iter());
+    moved.draw(&mut disp);
 
     disp.flush().unwrap();
 

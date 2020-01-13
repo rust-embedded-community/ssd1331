@@ -11,16 +11,18 @@ readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1331"
 version = "0.2.0-alpha.1"
 edition = "2018"
-[badges.travis-ci]
-branch = "master"
-repository = "jamwaffles/ssd1331"
+[badges]
+circle-ci = { repository = "jamwaffles/ssd1331", branch = "master" }
+
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
 
 [dependencies]
 embedded-hal = "0.2.3"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "0.6.0-alpha.2"
+version = "0.6.0-alpha.3"
 
 [dev-dependencies]
 cortex-m = "0.6.1"

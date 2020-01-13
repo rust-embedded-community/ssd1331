@@ -26,7 +26,7 @@
 #![no_main]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
+use embedded_graphics::{image::ImageLE, pixelcolor::BinaryColor, prelude::*};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::{
@@ -89,7 +89,9 @@ fn main() -> ! {
     let im = ImageLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64, 64);
 
     // Map on/off image colours to Rgb565::BLACK/Rgb565::WHITE
-    disp.draw(im.into_iter().map(|p| Pixel(p.0, p.1.into())));
+    im.into_iter()
+        .map(|p| Pixel(p.0, p.1.into()))
+        .draw(&mut disp);
 
     disp.flush().unwrap();
 

@@ -20,13 +20,13 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     fonts::Font6x8,
+///     fonts::{Font6x8, Text},
 ///     geometry::Point,
 ///     image::ImageLE,
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     primitives::{Circle, Line, Rectangle},
-///     Drawing,
+///     style::{PrimitiveStyleBuilder, TextStyleBuilder},
 /// };
 /// use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 /// # use ssd1331::test_helpers::{Pin, Spi};
@@ -42,31 +42,42 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// display.init().unwrap();
 /// display.flush().unwrap();
 ///
-/// display.draw(
-///     Line::new(Point::new(0, 0), Point::new(16, 16))
-///         .stroke(Some(Rgb565::RED))
-///         .stroke_width(1)
-///         .into_iter(),
-/// );
-/// display.draw(
-///     Rectangle::new(Point::new(24, 0), Point::new(40, 16))
-///         .stroke(Some(Rgb565::new(255, 127, 0)))
-///         .stroke_width(1)
-///         .into_iter(),
-/// );
-/// display.draw(
-///     Circle::new(Point::new(64, 8), 8)
-///         .stroke(Some(Rgb565::GREEN))
-///         .stroke_width(1)
-///         .into_iter(),
-/// );
-/// display.draw(&image);
-/// display.draw(
-///     Font6x8::render_str("Hello Rust!")
-///         .translate(Point::new(24, 24))
-///         .style(Style::stroke(Rgb565::RED))
-///         .into_iter(),
-/// );
+/// Line::new(Point::new(0, 0), Point::new(16, 16))
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::RED)
+///             .stroke_width(1)
+///             .build(),
+///     )
+///     .draw(&mut display);
+///
+/// Rectangle::new(Point::new(24, 0), Point::new(40, 16))
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::new(255, 127, 0))
+///             .stroke_width(1)
+///             .build(),
+///     )
+///     .draw(&mut display);
+///
+/// Circle::new(Point::new(64, 8), 8)
+///     .into_styled(
+///         PrimitiveStyleBuilder::new()
+///             .stroke_color(Rgb565::GREEN)
+///             .stroke_width(1)
+///             .build(),
+///     )
+///     .draw(&mut display);
+///
+/// image.draw(&mut display);
+///
+/// Text::new("Hello Rust!", Point::new(24, 24))
+///     .into_styled(
+///         TextStyleBuilder::new(Font6x8)
+///             .text_color(Rgb565::RED)
+///             .build(),
+///     )
+///     .draw(&mut display);
 ///
 /// // Render graphics objects to the screen
 /// display.flush().unwrap();
@@ -340,38 +351,37 @@ where
 }
 
 #[cfg(feature = "graphics")]
+use core::convert::TryInto;
+#[cfg(feature = "graphics")]
 use embedded_graphics::{
     drawable,
+    geometry::Size,
     pixelcolor::{
         raw::{RawData, RawU16},
         Rgb565,
     },
-    Drawing,
+    DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
-impl<SPI, DC> Drawing<Rgb565> for Ssd1331<SPI, DC>
+impl<SPI, DC> DrawTarget<Rgb565> for Ssd1331<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: IntoIterator<Item = drawable::Pixel<Rgb565>>,
-    {
-        // Filter out pixels that are off the top left of the screen
-        let on_screen_pixels = item_pixels
-            .into_iter()
-            .filter(|drawable::Pixel(point, _)| point.x >= 0 && point.y >= 0);
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) {
+        let drawable::Pixel(pos, color) = pixel;
 
-        for drawable::Pixel(point, color) in on_screen_pixels {
-            // NOTE: The filter above means the coordinate conversions from `i32` to `u32` should
-            // never error.
-            self.set_pixel(
-                point.x as u32,
-                point.y as u32,
-                RawU16::from(color).into_inner(),
-            );
-        }
+        self.set_pixel(
+            (pos.x).try_into().unwrap(),
+            (pos.y).try_into().unwrap(),
+            RawU16::from(color).into_inner(),
+        );
+    }
+
+    fn size(&self) -> Size {
+        let (w, h) = self.dimensions();
+
+        Size::new(w as u32, h as u32)
     }
 }

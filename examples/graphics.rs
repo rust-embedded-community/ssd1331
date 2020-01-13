@@ -25,7 +25,8 @@ use embedded_graphics::{
     geometry::Point,
     pixelcolor::Rgb565,
     prelude::*,
-    primitives::{Circle, Line, Rectangle, Triangle},
+    primitives::{Circle, Rectangle, Triangle},
+    style::PrimitiveStyleBuilder,
 };
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
@@ -80,27 +81,36 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    disp.draw(
-        Triangle::new(
-            Point::new(8, 16 + 16),
-            Point::new(8 + 16, 16 + 16),
-            Point::new(8 + 8, 16),
+    Triangle::new(
+        Point::new(8, 16 + 16),
+        Point::new(8 + 16, 16 + 16),
+        Point::new(8 + 8, 16),
+    )
+    .into_styled(
+        PrimitiveStyleBuilder::new()
+            .stroke_color(Rgb565::RED)
+            .stroke_width(1)
+            .build(),
+    )
+    .draw(&mut disp);
+
+    Rectangle::new(Point::new(36, 16), Point::new(36 + 16, 16 + 16))
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_color(Rgb565::GREEN)
+                .stroke_width(1)
+                .build(),
         )
-        .stroke(Some(Rgb565::RED))
-        .into_iter(),
-    );
+        .draw(&mut disp);
 
-    disp.draw(
-        Rectangle::new(Point::new(36, 16), Point::new(36 + 16, 16 + 16))
-            .stroke(Some(Rgb565::GREEN))
-            .into_iter(),
-    );
-
-    disp.draw(
-        Circle::new(Point::new(72, 16 + 8), 8)
-            .stroke(Some(Rgb565::BLUE))
-            .into_iter(),
-    );
+    Circle::new(Point::new(72, 16 + 8), 8)
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .stroke_color(Rgb565::BLUE)
+                .stroke_width(1)
+                .build(),
+        )
+        .draw(&mut disp);
 
     disp.flush().unwrap();
 

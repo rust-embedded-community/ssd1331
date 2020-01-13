@@ -85,7 +85,7 @@ fn main() -> ! {
     let im = ImageLE::new(include_bytes!("./ferris.raw"), 86, 64)
         .translate(Point::new((96 - 86) / 2, 0));
 
-    disp.draw(im.into_iter());
+    im.draw(&mut disp);
 
     disp.flush().unwrap();
 
