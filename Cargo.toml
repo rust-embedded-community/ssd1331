@@ -11,9 +11,8 @@ readme = "README.md"
 repository = "https://github.com/jamwaffles/ssd1331"
 version = "0.2.0-alpha.1"
 edition = "2018"
-[badges.travis-ci]
-branch = "master"
-repository = "jamwaffles/ssd1331"
+[badges]
+circle-ci = { repository = "jamwaffles/ssd1331", branch = "master" }
 
 [dependencies]
 embedded-hal = "0.2.3"

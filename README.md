@@ -1,6 +1,8 @@
 # SSD1331 driver
 
-[![Build Status](https://travis-ci.org/jamwaffles/ssd1331.svg?branch=master)](https://travis-ci.org/jamwaffles/ssd1331)
+[![Build Status](https://circleci.com/gh/jamwaffles/ssd1331/tree/master.svg?style=shield)](https://circleci.com/gh/jamwaffles/ssd1331/tree/master)
+[![Crates.io](https://img.shields.io/crates/v/ssd1331.svg)](https://crates.io/crates/ssd1331)
+[![Docs.rs](https://docs.rs/ssd1331/badge.svg)](https://docs.rs/ssd1331)
 
 [![SSD1331 display showing Ferris](readme_banner.jpg?raw=true)](examples/image.rs)
 
