@@ -23,6 +23,9 @@ if [ -z $DISABLE_EXAMPLES ]; then
 	cargo build --target $TARGET --all-features --examples
 fi
 
+# Remove stale docs - the linkchecker might miss links to old files if they're not removed
+cargo clean --doc
+
 cargo doc --all-features --target $TARGET
 
 linkchecker target/$TARGET/doc/ssd1331/index.html
