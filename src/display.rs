@@ -372,6 +372,12 @@ where
     fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) {
         let drawable::Pixel(pos, color) = pixel;
 
+        // Guard against negative values. All positive i32 values from `pos` can be represented in
+        // the `u32`s that `set_pixel()` accepts.
+        if pos.x < 0 || pos.y < 0 {
+            return;
+        }
+
         self.set_pixel(
             (pos.x).try_into().unwrap(),
             (pos.y).try_into().unwrap(),
