@@ -89,6 +89,7 @@ fn main() -> ! {
     .into_styled(
         PrimitiveStyleBuilder::new()
             .stroke_color(Rgb565::RED)
+            .stroke_width(1)
             .build(),
     )
     .draw(&mut disp);
@@ -97,6 +98,7 @@ fn main() -> ! {
         .into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_color(Rgb565::GREEN)
+                .stroke_width(1)
                 .build(),
         )
         .draw(&mut disp);
@@ -105,6 +107,7 @@ fn main() -> ! {
         .into_styled(
             PrimitiveStyleBuilder::new()
                 .stroke_color(Rgb565::BLUE)
+                .stroke_width(1)
                 .build(),
         )
         .draw(&mut disp);
