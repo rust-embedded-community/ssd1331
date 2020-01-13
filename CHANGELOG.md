@@ -22,6 +22,25 @@
 
 - None
 
+## 0.2.0-alpha.2
+
+### Added
+
+- None
+
+### Changed
+
+- **(breaking)** Upgraded to embedded-graphics 0.6.0-alpha.3
+- Migrated from Travis to CircleCI for repo builds
+
+### Fixed
+
+- Tell docs.rs to build against `x86_64-unknown-linux-gnu` so doc builds work again
+
+### Security
+
+- None
+
 ## 0.2.0-alpha.1
 
 The driver has been drastically simplified with removal of the `RawMode` and `GraphicsMode` structs, as well as the `Builder`.
