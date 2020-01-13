@@ -96,7 +96,6 @@ extern crate embedded_hal as hal;
 const DISPLAY_WIDTH: u8 = 96;
 const DISPLAY_HEIGHT: u8 = 64;
 
-mod check_readme;
 mod command;
 mod display;
 mod displayrotation;

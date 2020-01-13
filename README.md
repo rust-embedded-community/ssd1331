@@ -28,7 +28,7 @@ You can also export images directly from The GIMP by saving as `.bmp` and choosi
 Load a BMP image of the Rust logo and display it in the center of the display. From
 [`examples/bmp.rs`](examples/bmp.rs):
 
-```rust,ignore
+```rust
 #![no_std]
 #![no_main]
 
@@ -111,7 +111,7 @@ The full changelog can be found [here](CHANGELOG.md). A tl;dr version is shown b
 
 Version 0.1.x
 
-```rust,ignore
+```rust
 use ssd1331::{prelude::*, Builder};
 
 let mut disp: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
@@ -126,7 +126,7 @@ disp.get_rotation();
 
 Version 0.2.x
 
-```rust,ignore
+```rust
 use ssd1331::{Ssd1331, DisplayRotation};
 
 let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
