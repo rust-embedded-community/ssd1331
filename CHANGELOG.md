@@ -8,6 +8,10 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- [#4](https://github.com/jamwaffles/ssd1331/pull/4) guard against negative pixel coordinates panicking `draw_pixel()` calls.
+
 ## [0.2.0-alpha.2]
 
 ### Changed
