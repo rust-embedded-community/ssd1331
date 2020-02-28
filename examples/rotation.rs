@@ -26,7 +26,11 @@
 #![no_main]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{image::ImageLE, pixelcolor::BinaryColor, prelude::*};
+use embedded_graphics::{
+    image::{Image, ImageRawLE},
+    pixelcolor::BinaryColor,
+    prelude::*,
+};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::{
@@ -86,12 +90,15 @@ fn main() -> ! {
 
     // Load a 1BPP 64x64px image with LE (Little Endian) encoding of the Rust logo, white foreground
     // black background
-    let im = ImageLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64, 64);
+    let raw = ImageRawLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64, 64);
+
+    let im = Image::new(&raw, Point::zero());
 
     // Map on/off image colours to Rgb565::BLACK/Rgb565::WHITE
     im.into_iter()
         .map(|p| Pixel(p.0, p.1.into()))
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 

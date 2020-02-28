@@ -23,7 +23,7 @@
 #![no_main]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{geometry::Point, image::ImageBmp, prelude::*};
+use embedded_graphics::{geometry::Point, image::Image, prelude::*};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::{
@@ -32,6 +32,7 @@ use stm32f1xx_hal::{
     spi::{Mode, Phase, Polarity, Spi},
     stm32,
 };
+use tinybmp::Bmp;
 
 #[entry]
 fn main() -> ! {
@@ -77,17 +78,20 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let (w, h) = disp.dimensions();
+    let Size {
+        width: display_width,
+        height: display_height,
+    } = disp.size();
 
-    let im = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+    let bmp = Bmp::from_slice(include_bytes!("./rust-pride.bmp")).unwrap();
 
     // Position image in the center of the display
-    let moved = im.translate(Point::new(
-        (w as u32 - im.width()) as i32 / 2,
-        (h as u32 - im.height()) as i32 / 2,
-    ));
+    let top_left = Point::new(
+        (display_width as u32 - bmp.width()) as i32 / 2,
+        (display_height as u32 - bmp.height()) as i32 / 2,
+    );
 
-    moved.draw(&mut disp);
+    Image::new(&bmp, top_left).draw(&mut disp).unwrap();
 
     disp.flush().unwrap();
 

@@ -92,11 +92,13 @@ fn main() -> ! {
                 .text_color(Rgb565::WHITE)
                 .build(),
         )
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     Text::new("Hello Rust!", Point::new(0, 16))
         .into_styled(TextStyleBuilder::new(Font6x8).text_color(rust).build())
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     // Macros can also be used
     egtext!(
@@ -109,7 +111,8 @@ fn main() -> ! {
         )
     )
     .translate(Point::new(0, 24))
-    .draw(&mut disp);
+    .draw(&mut disp)
+    .unwrap();
 
     disp.flush().unwrap();
 

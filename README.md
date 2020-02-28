@@ -32,20 +32,23 @@ Load a BMP image of the Rust logo and display it in the center of the display. F
 #![no_std]
 #![no_main]
 
-use cortex_m_rt::ExceptionFrame;
-use cortex_m_rt::{entry, exception};
-use embedded_graphics::{geometry::Point, image::ImageBmp, prelude::*};
+use cortex_m_rt::{entry, exception, ExceptionFrame};
+use embedded_graphics::{geometry::Point, image::Image, prelude::*};
 use panic_semihosting as _;
-use ssd1331::{Ssd1331, DisplayRotation::Rotate0};
-use stm32f1xx_hal::delay::Delay;
-use stm32f1xx_hal::prelude::*;
-use stm32f1xx_hal::spi::{Mode, Phase, Polarity, Spi};
-use stm32f1xx_hal::stm32;
+use ssd1331::{DisplayRotation, Ssd1331};
+use stm32f1xx_hal::{
+    delay::Delay,
+    prelude::*,
+    spi::{Mode, Phase, Polarity, Spi},
+    stm32,
+};
+use tinybmp::Bmp;
 
 #[entry]
 fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let dp = stm32::Peripherals::take().unwrap();
+
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
@@ -57,7 +60,9 @@ fn main() -> ! {
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
+
     let mut delay = Delay::new(cp.SYST, clocks);
+
     let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
@@ -80,17 +85,20 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
-    let (w, h) = disp.dimensions();
+    let Size {
+        width: display_width,
+        height: display_height,
+    } = disp.size();
 
-    let im = ImageBmp::new(include_bytes!("./rust-pride.bmp")).unwrap();
+    let bmp = Bmp::from_slice(include_bytes!("./rust-pride.bmp")).unwrap();
 
     // Position image in the center of the display
-    let moved = im.translate(Point::new(
-        (w as u32 - im.width()) as i32 / 2,
-        (h as u32 - im.height()) as i32 / 2,
-    ));
+    let top_left = Point::new(
+        (display_width as u32 - bmp.width()) as i32 / 2,
+        (display_height as u32 - bmp.height()) as i32 / 2,
+    );
 
-    disp.draw(moved.into_iter());
+    Image::new(&bmp, top_left).draw(&mut disp).unwrap();
 
     disp.flush().unwrap();
 
@@ -101,6 +109,7 @@ fn main() -> ! {
 fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }
+
 ```
 
 ![Rust rainbow demo image.](readme_pride.jpg?raw=true)
@@ -143,9 +152,9 @@ disp.rotation();
 
 Licensed under either of
 
--   Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-    http://www.apache.org/licenses/LICENSE-2.0)
--   MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+  http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 

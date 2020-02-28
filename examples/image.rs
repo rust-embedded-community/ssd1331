@@ -26,7 +26,10 @@
 #![no_main]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{image::ImageLE, prelude::*};
+use embedded_graphics::{
+    image::{Image, ImageRawLE},
+    prelude::*,
+};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 use stm32f1xx_hal::{
@@ -82,10 +85,11 @@ fn main() -> ! {
 
     // Loads an 86x64px image encoded in LE (Little Endian) format. This image is a 16BPP image of
     // the Rust mascot, Ferris.
-    let im = ImageLE::new(include_bytes!("./ferris.raw"), 86, 64)
-        .translate(Point::new((96 - 86) / 2, 0));
+    let raw = ImageRawLE::new(include_bytes!("./ferris.raw"), 86, 64);
 
-    im.draw(&mut disp);
+    let im = Image::new(&raw, Point::new((96 - 86) / 2, 0));
+
+    im.draw(&mut disp).unwrap();
 
     disp.flush().unwrap();
 
