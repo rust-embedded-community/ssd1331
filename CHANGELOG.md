@@ -8,6 +8,11 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- [#5](https://github.com/jamwaffles/ssd1331/pull/5) Change pixel colour type to `Into<Rgb565>` when enabling embedded-graphics support.
+- [#5](https://github.com/jamwaffles/ssd1331/pull/5) Upgrade to embedded-graphics 0.6.0-beta.1
+
 ### Fixed
 
 - [#4](https://github.com/jamwaffles/ssd1331/pull/4) Guard against negative pixel coordinates panicking `draw_pixel()` calls.
