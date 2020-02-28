@@ -94,11 +94,7 @@ fn main() -> ! {
 
     let im = Image::new(&raw, Point::zero());
 
-    // Map on/off image colours to Rgb565::BLACK/Rgb565::WHITE
-    im.into_iter()
-        .map(|p| Pixel(p.0, p.1.into()))
-        .draw(&mut disp)
-        .unwrap();
+    im.draw(&mut disp).unwrap();
 
     disp.flush().unwrap();
 

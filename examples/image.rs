@@ -28,6 +28,7 @@
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
     image::{Image, ImageRawLE},
+    pixelcolor::Rgb565,
     prelude::*,
 };
 use panic_semihosting as _;
@@ -85,7 +86,7 @@ fn main() -> ! {
 
     // Loads an 86x64px image encoded in LE (Little Endian) format. This image is a 16BPP image of
     // the Rust mascot, Ferris.
-    let raw = ImageRawLE::new(include_bytes!("./ferris.raw"), 86, 64);
+    let raw = ImageRawLE::<Rgb565>::new(include_bytes!("./ferris.raw"), 86, 64);
 
     let im = Image::new(&raw, Point::new((96 - 86) / 2, 0));
 

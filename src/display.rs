@@ -360,20 +360,21 @@ use embedded_graphics::{
     geometry::Size,
     pixelcolor::{
         raw::{RawData, RawU16},
-        Rgb565,
+        PixelColor, Rgb565,
     },
     DrawTarget,
 };
 
 #[cfg(feature = "graphics")]
-impl<SPI, DC> DrawTarget<Rgb565> for Ssd1331<SPI, DC>
+impl<SPI, DC, C> DrawTarget<C> for Ssd1331<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
+    C: PixelColor + Into<Rgb565>,
 {
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) -> Result<(), Self::Error> {
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<C>) -> Result<(), Self::Error> {
         let drawable::Pixel(pos, color) = pixel;
 
         // Guard against negative values. All positive i32 values from `pos` can be represented in
@@ -382,7 +383,7 @@ where
             self.set_pixel(
                 (pos.x).try_into().unwrap(),
                 (pos.y).try_into().unwrap(),
-                RawU16::from(color).into_inner(),
+                RawU16::from(color.into()).into_inner(),
             )
         }
 

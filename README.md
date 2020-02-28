@@ -88,7 +88,7 @@ fn main() -> ! {
     let Size {
         width: display_width,
         height: display_height,
-    } = disp.size();
+    } = DrawTarget::<Rgb565>::size(&disp);
 
     let bmp = Bmp::from_slice(include_bytes!("./rust-pride.bmp")).unwrap();
 
@@ -98,7 +98,9 @@ fn main() -> ! {
         (display_height as u32 - bmp.height()) as i32 / 2,
     );
 
-    Image::new(&bmp, top_left).draw(&mut disp).unwrap();
+    Image::<_, Rgb565>::new(&bmp, top_left)
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 
