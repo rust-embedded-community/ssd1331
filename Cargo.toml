@@ -28,8 +28,17 @@ version = "=0.6.0-alpha.3"
 cortex-m = "0.6.1"
 cortex-m-rt = "0.6.11"
 panic-semihosting = "0.5.3"
-microfft = "0.3.0"
 heapless = "0.5.3"
+cortex-m-semihosting = "0.3.5"
+
+[dev-dependencies.microfft]
+version = "0.3.0"
+default-features = false
+features = ["maxn-128"]
+
+[dev-dependencies.num-traits]
+version = "0.2"
+default-features = false
 
 # Turns `bmp` feature on in examples to enable `ImageBmp`
 [dev-dependencies.embedded-graphics]

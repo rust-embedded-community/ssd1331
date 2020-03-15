@@ -10,14 +10,17 @@
 
 use core::fmt::Write;
 use cortex_m_rt::{entry, exception, ExceptionFrame};
+use cortex_m_semihosting::hprintln;
 use embedded_graphics::{
     fonts::{Font6x8, Text},
     geometry::Point,
     pixelcolor::Rgb565,
     prelude::*,
-    primitives::Rectangle,
+    primitives::{Line, Rectangle},
     style::{PrimitiveStyle, PrimitiveStyleBuilder, TextStyle},
 };
+use num_traits::cast::ToPrimitive;
+use num_traits::float::FloatCore;
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::{
@@ -27,6 +30,29 @@ use stm32f1xx_hal::{
     spi::{Mode, Phase, Polarity, Spi},
     stm32,
 };
+
+fn add_sample(buf: &mut [f32], sample: u16) {
+    // Half the mic input range in ADC value
+    let sample_range_half = 4096.0 * (MAX - MIN) / 2.0;
+    let adc_bias = BIAS * 4096.0;
+
+    buf.rotate_left(1);
+
+    // Subtract bias so sample is centered around 0
+    let sample = sample as f32 - adc_bias;
+
+    // Scale sample from -1 to 1
+    let sample = sample / sample_range_half;
+
+    buf[buf.len() - 1] = sample;
+}
+
+// Mic output has a DC bias of 1.25v. Assuming 3.3v supply voltage.
+const BIAS: f32 = (1.25 / 3.3);
+
+// 2Vpp (peak to peak) so 1v above bias voltage, or 2.25v
+const MAX: f32 = (2.25 / 3.3);
+const MIN: f32 = (0.25 / 3.3);
 
 #[entry]
 fn main() -> ! {
@@ -101,33 +127,63 @@ fn main() -> ! {
     let w = w as u16;
     let h = h as u16;
 
+    let mut samples: [f32; 32] = [0.0; 32];
+
+    // Bias point of 1.25 volts, mapped to screen coordinates
+    let bias_x = (BIAS * w as f32) as u32;
+
     loop {
         disp.clear();
 
         let data: u16 = adc1.read(&mut mic).unwrap();
 
+        add_sample(&mut samples, data);
+
+        // let mut out = samples.clone();
+        // let spectrum = microfft::real::rfft_32(&mut out);
+
+        // spectrum
+        //     .iter()
+        //     .map(|value| value.scale(0.01).re.abs() as i32)
+        //     .enumerate()
+        //     .map(|(idx, value)| {
+        //         Line::new(
+        //             Point::new(idx as i32, h as i32 - 10),
+        //             Point::new(idx as i32, h as i32 - 12 - value),
+        //         )
+        //         .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
+        //         .into_iter()
+        //     })
+        //     .flatten()
+        //     .draw(&mut disp);
+
         buf.clear();
-        write!(buf, "ADC: {}", data).ok();
+        // write!(buf, "Sample: {}", samples.last().unwrap()).ok();
+        write!(buf, "Sample: {}", data).ok();
 
         Text::new(&buf, Point::zero())
             .into_styled(TextStyle::new(Font6x8, Rgb565::WHITE))
             .draw(&mut disp);
 
-        buf.clear();
-        write!(buf, "Sample: {}", sample).ok();
-
-        Text::new(&buf, Point::new(0, 8))
-            .into_styled(TextStyle::new(Font6x8, rust))
-            .draw(&mut disp);
-
         let bar_width = data / (4096 / w);
 
         Rectangle::new(
-            Point::new(0, h as i32 - 5),
-            Point::new(bar_width as i32, h as i32),
+            Point::new(w as i32 / 2, h as i32 - 8),
+            Point::new(
+                (samples.last().unwrap() * (w / 2) as f32) as i32,
+                h as i32 - 2,
+            ),
         )
         .into_styled(PrimitiveStyle::with_fill(rust))
         .draw(&mut disp);
+
+        // // Bias point line
+        // Line::new(
+        //     Point::new(bias_x as i32, h as i32),
+        //     Point::new(bias_x as i32, h as i32 - 10),
+        // )
+        // .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
+        // .draw(&mut disp);
 
         disp.flush().unwrap();
 
