@@ -12,6 +12,10 @@ projects using an SPI interface.
 
 - [#4](https://github.com/jamwaffles/ssd1331/pull/4) Guard against negative pixel coordinates panicking `draw_pixel()` calls.
 
+### Changed
+
+- **(breaking)** Upgraded to embedded-graphics 0.6.0-beta.2
+
 ## [0.2.0-alpha.2]
 
 ### Changed

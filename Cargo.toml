@@ -22,7 +22,7 @@ embedded-hal = "0.2.3"
 
 [dependencies.embedded-graphics]
 optional = true
-version = "=0.6.0-alpha.3"
+version = "=0.6.0-beta.2"
 
 [dev-dependencies]
 cortex-m = "0.6.1"
@@ -40,10 +40,9 @@ features = ["maxn-128"]
 version = "0.2"
 default-features = false
 
-# Turns `bmp` feature on in examples to enable `ImageBmp`
-[dev-dependencies.embedded-graphics]
-version = "=0.6.0-alpha.3"
-features = ["bmp"]
+[dev-dependencies.tinybmp]
+version = "0.2"
+features = [ "graphics" ]
 
 [dev-dependencies.stm32f1xx-hal]
 version = "0.5.2"
