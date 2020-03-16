@@ -4,6 +4,8 @@
 #![no_main]
 
 use core::convert::TryFrom;
+use cortex_m::singleton;
+use cortex_m_semihosting::hprintln;
 use embedded_graphics::{
     geometry::Point, image::Image, pixelcolor::BinaryColor, prelude::*, primitives::Rectangle,
 };
@@ -14,9 +16,10 @@ use stm32f1xx_hal::{
     adc,
     delay::Delay,
     dma, gpio,
-    pac::{self, SPI1},
+    pac::{self, ADC1, SPI1},
     prelude::*,
     spi::{self, Mode, Phase, Polarity, Spi},
+    timer,
     timer::{CountDownTimer, Event, Timer},
 };
 use tinybmp::Bmp;
@@ -36,8 +39,13 @@ type Display = Ssd1331<
 
 type DebugLed = gpio::gpioc::PC13<gpio::Output<gpio::PushPull>>;
 
-type Sampler =
-    dma::RxDma<adc::AdcPayload<gpio::gpioa::PA3<gpio::Analog>, adc::Continuous>, dma::dma1::C1>;
+type Mic = stm32f1xx_hal::gpio::gpioa::PA3<stm32f1xx_hal::gpio::Analog>;
+
+// type AdcChannelThing =
+//     dma::RxDma<adc::AdcPayload<gpio::gpioa::PA3<gpio::Analog>, adc::Continuous>, dma::dma1::C1>;
+
+// type Sampler = stm32f1xx_hal::dma::CircBuffer<[u16; NUM_SAMPLES], AdcChannelThing>;
+type Sampler = stm32f1xx_hal::adc::Adc<ADC1>;
 
 const NUM_SAMPLES: usize = 8;
 
@@ -51,7 +59,8 @@ const APP: () = {
         count: u32,
         #[init([0; NUM_SAMPLES])]
         sample_buf: [u16; NUM_SAMPLES],
-        adc: Sampler,
+        sampler: Sampler,
+        mic: Mic,
     }
 
     #[init]
@@ -105,50 +114,59 @@ const APP: () = {
 
         let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
-        let dma_ch1 = dp.DMA1.split(&mut rcc.ahb).1;
-
-        // Setup ADC
-        let adc1 = adc::Adc::adc1(dp.ADC1, &mut rcc.apb2, clocks);
-
-        // Configure pa3 as an analog input
-        let adc_ch0 = gpioa.pa3.into_analog(&mut gpioa.crl);
-
-        let adc_dma = adc1.with_dma(adc_ch0, dma_ch1);
-
         let mut timer = Timer::tim1(dp.TIM1, &clocks, &mut rcc.apb2).start_count_down(20.hz());
 
-        timer.listen(Event::Update);
+        timer.listen(timer::Event::Update);
+
+        let mut sampler = adc::Adc::adc1(dp.ADC1, &mut rcc.apb2, clocks);
+
+        let mic = gpioa.pa3.into_analog(&mut gpioa.crl);
 
         // Init the static resources to use them later through RTFM
         init::LateResources {
             timer,
             display,
             led,
-            adc: adc_dma,
+            sampler,
+            mic,
         }
     }
 
-    #[task(binds = TIM1_UP, resources = [timer, count, adc, led])]
+    // #[task(binds = DMA1_CHANNEL1, priority = 2, resources = [count, sample_buf, adc])]
+    // fn sample(cx: sample::Context) {
+    //     let sample::Resources {
+    //         count,
+    //         sample_buf,
+    //         adc,
+    //         ..
+    //     } = cx.resources;
+
+    //     // *sample_buf = adc.peek(|half, _| *half).unwrap();
+
+    //     *count += 1;
+    // }
+
+    #[task(binds = TIM1_UP, resources = [count, timer, led, sample_buf, mic, sampler])]
     fn update(cx: update::Context) {
         use core::fmt::Write;
 
         let update::Resources {
             count,
-            adc,
             timer,
             led,
+            sample_buf,
+            sampler,
+            mic,
             ..
         } = cx.resources;
 
-        *count += 1;
+        sample_buf.rotate_right(1);
+
+        sample_buf[sample_buf.len() - 1] = sampler.read(mic).unwrap();
 
         led.toggle();
 
         // Clears the update flag
         timer.clear_update_interrupt_flag();
-    }
-
-    extern "C" {
-        fn EXTI0();
     }
 };
