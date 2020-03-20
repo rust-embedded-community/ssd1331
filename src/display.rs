@@ -22,7 +22,7 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// use embedded_graphics::{
 ///     fonts::{Font6x8, Text},
 ///     geometry::Point,
-///     image::ImageLE,
+///     image::{Image, ImageRawLE},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     primitives::{Circle, Line, Rectangle},
@@ -36,7 +36,9 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// let dc = Pin;
 ///
 /// let mut display = Ssd1331::new(spi, dc, Rotate0);
-/// let image = ImageLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
+/// let raw = ImageRawLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
+///
+/// let image: Image<ImageRawLE<Rgb565>, Rgb565> = Image::new(&raw, Point::zero());
 ///
 /// // Initialise and clear the display
 /// display.init().unwrap();
@@ -369,13 +371,15 @@ where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) {
+    type Error = core::convert::Infallible;
+
+    fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) -> Result<(), Self::Error> {
         let drawable::Pixel(pos, color) = pixel;
 
         // Guard against negative values. All positive i32 values from `pos` can be represented in
         // the `u32`s that `set_pixel()` accepts.
         if pos.x < 0 || pos.y < 0 {
-            return;
+            return Ok(());
         }
 
         self.set_pixel(
@@ -383,6 +387,8 @@ where
             (pos.y).try_into().unwrap(),
             RawU16::from(color).into_inner(),
         );
+
+        Ok(())
     }
 
     fn size(&self) -> Size {

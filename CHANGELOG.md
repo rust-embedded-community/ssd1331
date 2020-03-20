@@ -8,6 +8,10 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **(breaking)** [#6](https://github.com/jamwaffles/ssd1331/pull/6) Upgrade to embedded-graphics 0.6.0
+
 ### Fixed
 
 - [#4](https://github.com/jamwaffles/ssd1331/pull/4) Guard against negative pixel coordinates panicking `draw_pixel()` calls.
