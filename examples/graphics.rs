@@ -92,7 +92,8 @@ fn main() -> ! {
             .stroke_width(1)
             .build(),
     )
-    .draw(&mut disp);
+    .draw(&mut disp)
+    .unwrap();
 
     Rectangle::new(Point::new(36, 16), Point::new(36 + 16, 16 + 16))
         .into_styled(
@@ -101,7 +102,8 @@ fn main() -> ! {
                 .stroke_width(1)
                 .build(),
         )
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     Circle::new(Point::new(72, 16 + 8), 8)
         .into_styled(
@@ -110,7 +112,8 @@ fn main() -> ! {
                 .stroke_width(1)
                 .build(),
         )
-        .draw(&mut disp);
+        .draw(&mut disp)
+        .unwrap();
 
     disp.flush().unwrap();
 
