@@ -8,6 +8,8 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.0] - 2020-03-20
+
 ### Changed
 
 - **(breaking)** [#6](https://github.com/jamwaffles/ssd1331/pull/6) Upgrade to embedded-graphics 0.6.0
@@ -113,7 +115,8 @@ disp.rotation();
 - **(breaking)** Removed `Builder` struct.
 
 <!-- next-url -->
+[unreleased]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0...HEAD
 
-[unreleased]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0-alpha.2...HEAD
+[0.2.0]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0-alpha.2...v0.2.0
 [0.2.0-alpha.2]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0-alpha.1...v0.2.0-alpha.2
 [0.2.0-alpha.1]: https://github.com/jamwaffles/ssd1331/compare/0.1.3...v0.2.0-alpha.1
