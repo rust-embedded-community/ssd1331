@@ -22,7 +22,7 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// use embedded_graphics::{
 ///     fonts::{Font6x8, Text},
 ///     geometry::Point,
-///     image::ImageLE,
+///     image::{Image, ImageRawLE},
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
 ///     primitives::{Circle, Line, Rectangle},
@@ -36,7 +36,9 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// let dc = Pin;
 ///
 /// let mut display = Ssd1331::new(spi, dc, Rotate0);
-/// let image = ImageLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
+/// let raw = ImageRawLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
+///
+/// let image: Image<ImageRawLE<Rgb565>, Rgb565> = Image::new(&raw, Point::zero());
 ///
 /// // Initialise and clear the display
 /// display.init().unwrap();

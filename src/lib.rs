@@ -46,8 +46,9 @@
 //!
 //! ```rust
 //! # use ssd1331::test_helpers::{Spi, Pin};
-//! use embedded_graphics::{image::ImageBmp, prelude::*};
+//! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
 //! use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
+//! use tinybmp::Bmp;
 //!
 //! // Set up SPI interface and digital pin. These are stub implementations used in examples.
 //! let spi = Spi;
@@ -56,10 +57,12 @@
 //! let mut display = Ssd1331::new(spi, dc, Rotate0);
 //! display.init();
 //!
-//! let im = ImageBmp::new(include_bytes!("../examples/rust-pride.bmp")).unwrap();
+//! let bmp = Bmp::from_slice(include_bytes!("../examples/rust-pride.bmp")).unwrap();
+//!
+//! let im: Image<Bmp, Rgb565> = Image::new(&bmp, Point::zero());
 //!
 //! // Center the image on the display
-//! let moved = im.translate(Point::new((96 - im.width() as i32) / 2, 0));
+//! let moved = im.translate(Point::new((96 - bmp.width() as i32) / 2, 0));
 //!
 //! moved.draw(&mut display);
 //!
