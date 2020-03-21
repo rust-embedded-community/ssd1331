@@ -8,6 +8,10 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Fix docs.rs build config
+
 ## [0.2.1] - 2020-03-20
 
 ## [0.2.0] - 2020-03-20
@@ -117,9 +121,9 @@ disp.rotation();
 - **(breaking)** Removed `Builder` struct.
 
 <!-- next-url -->
+
 [unreleased]: https://github.com/jamwaffles/ssd1331/compare/v0.2.1...HEAD
 [0.2.1]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0...v0.2.1
-
 [0.2.0]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0-alpha.2...v0.2.0
 [0.2.0-alpha.2]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0-alpha.1...v0.2.0-alpha.2
 [0.2.0-alpha.1]: https://github.com/jamwaffles/ssd1331/compare/0.1.3...v0.2.0-alpha.1
