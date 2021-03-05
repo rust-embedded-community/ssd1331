@@ -351,16 +351,15 @@ where
         self.display_rotation
     }
 
-    /// Turn the display off (eg exiting sleep mode)
+    /// Turn the display on (eg exiting sleep mode)
     pub fn turn_on(&mut self) -> Result<(), Error<CommE, PinE>> {
         Command::DisplayOn(true).send(&mut self.spi, &mut self.dc)
     }
 
-    /// Turn the display off (sleep mode)
+    /// Turn the display off (enter sleep mode)
     pub fn turn_off(&mut self) -> Result<(), Error<CommE, PinE>> {
         Command::DisplayOn(false).send(&mut self.spi, &mut self.dc)
     }
-
 }
 
 #[cfg(feature = "graphics")]
