@@ -8,6 +8,10 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- [#11](https://github.com/jamwaffles/ssd1331/pull/11) Add `turn_on` and `turn_off` methods.
+
 ## [0.2.2] - 2020-03-21
 
 ### Fixed
