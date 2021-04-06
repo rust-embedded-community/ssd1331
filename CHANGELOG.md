@@ -8,6 +8,8 @@ projects using an SPI interface.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.3] - 2021-04-06
+
 ### Added
 
 - [#11](https://github.com/jamwaffles/ssd1331/pull/11) Add `turn_on` and `turn_off` methods.
@@ -127,7 +129,8 @@ disp.rotation();
 - **(breaking)** Removed `Builder` struct.
 
 <!-- next-url -->
-[unreleased]: https://github.com/jamwaffles/ssd1331/compare/v0.2.2...HEAD
+[unreleased]: https://github.com/jamwaffles/ssd1331/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/jamwaffles/ssd1331/compare/v0.2.2...v0.2.3
 
 [0.2.2]: https://github.com/jamwaffles/ssd1331/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/jamwaffles/ssd1331/compare/v0.2.0...v0.2.1
