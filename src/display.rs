@@ -1,4 +1,4 @@
-use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
+use hal::{blocking::delay::DelayMs, blocking::delay::DelayUs, digital::v2::OutputPin};
 
 use crate::{
     command::{AddressIncrementMode, ColorMode, Command, VcomhLevel},
@@ -227,6 +227,27 @@ where
 
         self.buffer[idx] = high;
         self.buffer[idx + 1] = low;
+    }
+
+    /// Draw a line directly into the ssd1331 (bypassing the frame buffer) using it's
+    /// hardware acceleration.  This does no bounds checking.
+    pub fn draw_hw_line(&mut self, x1: u32, y1: u32, x2: u32, y2: u32, value: u16
+    ) -> Result<(), Error<CommE, PinE>> {
+        // TODO: should we try to clip the line to the display here?  that could be tricky.
+        Command::DrawLine(x1 as u8, y1 as u8, x2 as u8, y2 as u8, value)
+            .send(&mut self.spi, &mut self.dc)
+    }
+
+    /// Draw a line directly into the ssd1331 (bypassing the frame buffer) using it's
+    /// hardware acceleration.  This does no bounds checking.
+    pub fn draw_hw_rect<DELAY>(&mut self, x1: u32, y1: u32, x2: u32, y2: u32, line: u16, fill: Option<u16>, delay: &mut DELAY
+    ) -> Result<(), Error<CommE, PinE>>
+        where DELAY: DelayUs<u32>,
+    {
+        Command::EnableFill(fill.is_some()).send(&mut self.spi, &mut self.dc)?;
+        Command::DrawRect(x1 as u8, y1 as u8, x2 as u8, y2 as u8, line, fill.unwrap_or(0))
+            .send(&mut self.spi, &mut self.dc)
+            .map(|r| if fill.is_some() { delay.delay_us(10) }) // delay 10us if we had to do filling
     }
 
     /// Initialise display, setting sensible defaults and rotation
