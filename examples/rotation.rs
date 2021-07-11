@@ -20,7 +20,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example rotation`.
+//! Run on a Blue Pill with `cargo run --release --example rotation`.
 
 #![no_std]
 #![no_main]
