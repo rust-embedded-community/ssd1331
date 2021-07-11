@@ -14,7 +14,13 @@ The display is configured by this driver to use a 16 bit, R5 G6 B5 pixel definit
 You can convert images into the correct BMP format with the following commands:
 
 ```bash
-convert my_image.png -flip -type truecolor -define bmp:subtype=RGB565 -depth 16 -strip my_image.bmp
+convert my_image.png \
+    -flip \
+    -type truecolor \
+    -define bmp:subtype=RGB565 \
+    -depth 16 \
+    -strip \
+    my_image.bmp
 ```
 
 You can also export images directly from The GIMP by saving as `.bmp` and choosing the following option:
