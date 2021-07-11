@@ -86,13 +86,11 @@ fn main() -> ! {
 
     // Load a 1BPP 64x64px image with LE (Little Endian) encoding of the Rust logo, white foreground
     // black background
-    let im = ImageRawLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64, 64);
+    let im = ImageRawLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64);
 
-    // Map on/off image colours to Rgb565::BLACK/Rgb565::WHITE
-    im.into_iter()
-        .map(|p| Pixel(p.0, p.1.into()))
-        .draw(&mut disp)
-        .unwrap();
+    // Use `color_converted` to create a wrapper that converts BinaryColors to Rgb565 colors to send
+    // to the display.
+    im.draw(&mut disp.color_converted()).unwrap();
 
     disp.flush().unwrap();
 

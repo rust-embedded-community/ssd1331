@@ -1,5 +1,5 @@
 //! Print "Hello world!" with "Hello rust!" underneath. Uses the `embedded_graphics` crate to draw
-//! the text with a 6x8 pixel font.
+//! the text with a 6x10 and 9x18 pixel monospace font.
 //!
 //! This example is for the STM32F103 "Blue Pill" board using a 4 wire interface to the display on
 //! SPI1.
@@ -22,13 +22,14 @@
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{
-    egtext,
-    fonts::{Font6x8, Text},
     geometry::Point,
+    mono_font::{
+        ascii::{FONT_6X10, FONT_9X18},
+        MonoTextStyleBuilder,
+    },
     pixelcolor::Rgb565,
     prelude::*,
-    style::TextStyleBuilder,
-    text_style,
+    text::{Baseline, Text},
 };
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
@@ -83,34 +84,28 @@ fn main() -> ! {
     disp.init().unwrap();
     disp.flush().unwrap();
 
+    let white_style = MonoTextStyleBuilder::new()
+        .font(&FONT_6X10)
+        .text_color(Rgb565::WHITE)
+        .build();
+
+    Text::with_baseline("Hello world!", Point::zero(), white_style, Baseline::Top)
+        .draw(&mut disp)
+        .unwrap();
+
     // Red with a small amount of green creates a deep orange colour
-    let rust = Rgb565::new(0xff, 0x07, 0x00);
+    let rust_style = MonoTextStyleBuilder::new()
+        .font(&FONT_9X18)
+        .text_color(Rgb565::new(0xff, 0x07, 0x00))
+        .build();
 
-    Text::new("Hello world!", Point::zero())
-        .into_styled(
-            TextStyleBuilder::new(Font6x8)
-                .text_color(Rgb565::WHITE)
-                .build(),
-        )
-        .draw(&mut disp)
-        .unwrap();
-
-    Text::new("Hello Rust!", Point::new(0, 16))
-        .into_styled(TextStyleBuilder::new(Font6x8).text_color(rust).build())
-        .draw(&mut disp)
-        .unwrap();
-
-    // Macros can also be used
-    egtext!(
-        text = "Hello macros!",
-        top_left = (0, 0),
-        style = text_style!(
-            font = Font6x8,
-            text_color = Rgb565::RED,
-            background_color = Rgb565::GREEN
-        )
+    Text::with_baseline(
+        "Hello Rust!",
+        // Position this text below "Hello world!", using the previous font's height
+        Point::new(0, white_style.font.character_size.height as i32),
+        rust_style,
+        Baseline::Top,
     )
-    .translate(Point::new(0, 24))
     .draw(&mut disp)
     .unwrap();
 

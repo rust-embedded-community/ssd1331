@@ -61,7 +61,7 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 ///     .draw(&mut display)
 ///     .unwrap();
 ///
-/// Circle::new(Point::new(72, 16 + 8), 8)
+/// Circle::new(Point::new(64, 16), 16)
 ///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 1))
 ///     .draw(&mut display)
 ///     .unwrap();
