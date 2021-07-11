@@ -85,7 +85,7 @@ fn main() -> ! {
 
     // Loads an 86x64px image encoded in LE (Little Endian) format. This image is a 16BPP image of
     // the Rust mascot, Ferris.
-    let im = ImageRawLE::new(include_bytes!("./ferris.raw"), 86, 64);
+    let im = ImageRawLE::new(include_bytes!("./ferris.raw"), 86);
 
     Image::new(&im, Point::new((96 - 86) / 2, 0))
         .draw(&mut disp)
