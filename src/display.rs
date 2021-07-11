@@ -20,13 +20,16 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 ///
 /// ```rust
 /// use embedded_graphics::{
-///     fonts::{Font6x8, Text},
 ///     geometry::Point,
 ///     image::{Image, ImageRawLE},
+///     mono_font::{
+///         ascii::{FONT_6X10, FONT_9X18},
+///         MonoTextStyleBuilder,
+///     },
 ///     pixelcolor::Rgb565,
 ///     prelude::*,
-///     primitives::{Circle, Line, Rectangle},
-///     style::{PrimitiveStyleBuilder, TextStyleBuilder},
+///     primitives::{Circle, Line, PrimitiveStyle, Rectangle, Triangle},
+///     text::{Baseline, Text},
 /// };
 /// use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 /// # use ssd1331::test_helpers::{Pin, Spi};
@@ -36,50 +39,44 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// let dc = Pin;
 ///
 /// let mut display = Ssd1331::new(spi, dc, Rotate0);
-/// let raw = ImageRawLE::new(include_bytes!("../examples/ferris.raw"), 86, 64);
+/// let raw = ImageRawLE::new(include_bytes!("../examples/ferris.raw"), 86);
 ///
-/// let image: Image<ImageRawLE<Rgb565>, Rgb565> = Image::new(&raw, Point::zero());
+/// let image: Image<ImageRawLE<Rgb565>> = Image::new(&raw, Point::zero());
 ///
 /// // Initialise and clear the display
 /// display.init().unwrap();
 /// display.flush().unwrap();
 ///
-/// Line::new(Point::new(0, 0), Point::new(16, 16))
-///     .into_styled(
-///         PrimitiveStyleBuilder::new()
-///             .stroke_color(Rgb565::RED)
-///             .stroke_width(1)
-///             .build(),
-///     )
-///     .draw(&mut display);
+/// Triangle::new(
+///     Point::new(8, 16 + 16),
+///     Point::new(8 + 16, 16 + 16),
+///     Point::new(8 + 8, 16),
+/// )
+/// .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
+/// .draw(&mut display)
+/// .unwrap();
 ///
-/// Rectangle::new(Point::new(24, 0), Point::new(40, 16))
-///     .into_styled(
-///         PrimitiveStyleBuilder::new()
-///             .stroke_color(Rgb565::new(255, 127, 0))
-///             .stroke_width(1)
-///             .build(),
-///     )
-///     .draw(&mut display);
+/// Rectangle::with_corners(Point::new(36, 16), Point::new(36 + 16, 16 + 16))
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
+///     .draw(&mut display)
+///     .unwrap();
 ///
-/// Circle::new(Point::new(64, 8), 8)
-///     .into_styled(
-///         PrimitiveStyleBuilder::new()
-///             .stroke_color(Rgb565::GREEN)
-///             .stroke_width(1)
-///             .build(),
-///     )
-///     .draw(&mut display);
+/// Circle::new(Point::new(72, 16 + 8), 8)
+///     .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 1))
+///     .draw(&mut display)
+///     .unwrap();
 ///
 /// image.draw(&mut display);
 ///
-/// Text::new("Hello Rust!", Point::new(24, 24))
-///     .into_styled(
-///         TextStyleBuilder::new(Font6x8)
-///             .text_color(Rgb565::RED)
-///             .build(),
-///     )
-///     .draw(&mut display);
+/// // Red with a small amount of green creates a deep orange colour
+/// let rust_style = MonoTextStyleBuilder::new()
+///     .font(&FONT_9X18)
+///     .text_color(Rgb565::RED)
+///     .build();
+///
+/// Text::with_baseline("Hello Rust!", Point::new(0, 0), rust_style, Baseline::Top)
+///     .draw(&mut display)
+///     .unwrap();
 ///
 /// // Render graphics objects to the screen
 /// display.flush().unwrap();
@@ -202,8 +199,7 @@ where
         Ok(())
     }
 
-    /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
-    /// coordinates are out of the bounds of the display, this method call is a noop.
+    /// Set the value for an individual pixel.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u16) {
         let idx = match self.display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
@@ -363,47 +359,52 @@ where
 }
 
 #[cfg(feature = "graphics")]
-use core::convert::TryInto;
-#[cfg(feature = "graphics")]
-use embedded_graphics::{
-    drawable,
+use embedded_graphics_core::{
+    draw_target::DrawTarget,
     geometry::Size,
+    geometry::{Dimensions, OriginDimensions},
     pixelcolor::{
         raw::{RawData, RawU16},
         Rgb565,
     },
-    DrawTarget,
+    Pixel,
 };
 
 #[cfg(feature = "graphics")]
-impl<SPI, DC> DrawTarget<Rgb565> for Ssd1331<SPI, DC>
+impl<SPI, DC> DrawTarget for Ssd1331<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
+    type Color = Rgb565;
     type Error = core::convert::Infallible;
 
-    fn draw_pixel(&mut self, pixel: drawable::Pixel<Rgb565>) -> Result<(), Self::Error> {
-        let drawable::Pixel(pos, color) = pixel;
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        let bb = self.bounding_box();
 
-        // Guard against negative values. All positive i32 values from `pos` can be represented in
-        // the `u32`s that `set_pixel()` accepts.
-        if pos.x < 0 || pos.y < 0 {
-            return Ok(());
-        }
-
-        self.set_pixel(
-            (pos.x).try_into().unwrap(),
-            (pos.y).try_into().unwrap(),
-            RawU16::from(color).into_inner(),
-        );
+        pixels
+            .into_iter()
+            .filter(|Pixel(pos, _color)| bb.contains(*pos))
+            .for_each(|Pixel(pos, color)| {
+                self.set_pixel(pos.x as u32, pos.y as u32, RawU16::from(color).into_inner())
+            });
 
         Ok(())
     }
+}
 
+#[cfg(feature = "graphics")]
+impl<SPI, DC> OriginDimensions for Ssd1331<SPI, DC>
+where
+    SPI: hal::blocking::spi::Write<u8>,
+    DC: OutputPin,
+{
     fn size(&self) -> Size {
         let (w, h) = self.dimensions();
 
-        Size::new(w as u32, h as u32)
+        Size::new(w.into(), h.into())
     }
 }
