@@ -74,11 +74,11 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut display = Ssd1331::new(spi, dc, Rotate0);
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
-    disp.flush().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
+    display.flush().unwrap();
 
     Triangle::new(
         Point::new(8, 16 + 16),
@@ -86,20 +86,20 @@ fn main() -> ! {
         Point::new(8 + 8, 16),
     )
     .into_styled(PrimitiveStyle::with_stroke(Rgb565::RED, 1))
-    .draw(&mut disp)
+    .draw(&mut display)
     .unwrap();
 
     Rectangle::with_corners(Point::new(36, 16), Point::new(36 + 16, 16 + 16))
         .into_styled(PrimitiveStyle::with_stroke(Rgb565::GREEN, 1))
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
     Circle::new(Point::new(64, 16), 16)
         .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLUE, 1))
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

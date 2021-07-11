@@ -72,13 +72,13 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
+    let mut display = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
-    disp.flush().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
+    display.flush().unwrap();
 
-    let (w, h) = disp.dimensions();
+    let (w, h) = display.dimensions();
 
     let bmp =
         Bmp::from_slice(include_bytes!("./rust-pride.bmp")).expect("Failed to load BMP image");
@@ -91,9 +91,9 @@ fn main() -> ! {
         (h as u32 - bmp.size().height) as i32 / 2,
     ));
 
-    moved.draw(&mut disp).unwrap();
+    moved.draw(&mut display).unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

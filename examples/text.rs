@@ -78,11 +78,11 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut display = Ssd1331::new(spi, dc, Rotate0);
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
-    disp.flush().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
+    display.flush().unwrap();
 
     let white_style = MonoTextStyleBuilder::new()
         .font(&FONT_6X10)
@@ -90,7 +90,7 @@ fn main() -> ! {
         .build();
 
     Text::with_baseline("Hello world!", Point::zero(), white_style, Baseline::Top)
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
     // Red with a small amount of green creates a deep orange colour
@@ -106,10 +106,10 @@ fn main() -> ! {
         rust_style,
         Baseline::Top,
     )
-    .draw(&mut disp)
+    .draw(&mut display)
     .unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

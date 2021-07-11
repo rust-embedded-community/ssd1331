@@ -77,21 +77,21 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut display = Ssd1331::new(spi, dc, Rotate0);
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
-    disp.flush().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
+    display.flush().unwrap();
 
     // Loads an 86x64px image encoded in LE (Little Endian) format. This image is a 16BPP image of
     // the Rust mascot, Ferris.
     let im = ImageRawLE::new(include_bytes!("./ferris.raw"), 86);
 
     Image::new(&im, Point::new((96 - 86) / 2, 0))
-        .draw(&mut disp)
+        .draw(&mut display)
         .unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }

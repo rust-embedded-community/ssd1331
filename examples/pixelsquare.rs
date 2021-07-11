@@ -69,11 +69,11 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut disp = Ssd1331::new(spi, dc, Rotate0);
+    let mut display = Ssd1331::new(spi, dc, Rotate0);
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
-    disp.flush().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
+    display.flush().unwrap();
 
     let white = 0xffff;
     let red = 0xf800;
@@ -81,30 +81,30 @@ fn main() -> ! {
     let blue = 0x001f;
 
     // Top side
-    disp.set_pixel(0, 0, white);
-    disp.set_pixel(1, 0, white);
-    disp.set_pixel(2, 0, white);
-    disp.set_pixel(3, 0, white);
+    display.set_pixel(0, 0, white);
+    display.set_pixel(1, 0, white);
+    display.set_pixel(2, 0, white);
+    display.set_pixel(3, 0, white);
 
     // Right side
-    disp.set_pixel(3, 0, red);
-    disp.set_pixel(3, 1, red);
-    disp.set_pixel(3, 2, red);
-    disp.set_pixel(3, 3, red);
+    display.set_pixel(3, 0, red);
+    display.set_pixel(3, 1, red);
+    display.set_pixel(3, 2, red);
+    display.set_pixel(3, 3, red);
 
     // Bottom side
-    disp.set_pixel(0, 3, green);
-    disp.set_pixel(1, 3, green);
-    disp.set_pixel(2, 3, green);
-    disp.set_pixel(3, 3, green);
+    display.set_pixel(0, 3, green);
+    display.set_pixel(1, 3, green);
+    display.set_pixel(2, 3, green);
+    display.set_pixel(3, 3, green);
 
     // Left side
-    disp.set_pixel(0, 0, blue);
-    disp.set_pixel(0, 1, blue);
-    disp.set_pixel(0, 2, blue);
-    disp.set_pixel(0, 3, blue);
+    display.set_pixel(0, 0, blue);
+    display.set_pixel(0, 1, blue);
+    display.set_pixel(0, 2, blue);
+    display.set_pixel(0, 3, blue);
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }
