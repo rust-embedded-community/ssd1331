@@ -15,7 +15,7 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --example text`.
+//! Run on a Blue Pill with `cargo run --release --example text`.
 
 #![no_std]
 #![no_main]
