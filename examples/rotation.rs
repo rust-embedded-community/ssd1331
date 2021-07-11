@@ -75,14 +75,14 @@ fn main() -> ! {
     );
 
     // Initialise the display with a default rotation of 90 degrees
-    let mut disp = Ssd1331::new(spi, dc, DisplayRotation::Rotate90);
+    let mut display = Ssd1331::new(spi, dc, DisplayRotation::Rotate90);
 
-    disp.reset(&mut rst, &mut delay).unwrap();
-    disp.init().unwrap();
-    disp.flush().unwrap();
+    display.reset(&mut rst, &mut delay).unwrap();
+    display.init().unwrap();
+    display.flush().unwrap();
 
     // Set a new rotation of 270 degrees
-    disp.set_rotation(DisplayRotation::Rotate270).unwrap();
+    display.set_rotation(DisplayRotation::Rotate270).unwrap();
 
     // Load a 1BPP 64x64px image with LE (Little Endian) encoding of the Rust logo, white foreground
     // black background
@@ -90,9 +90,9 @@ fn main() -> ! {
 
     // Use `color_converted` to create a wrapper that converts BinaryColors to Rgb565 colors to send
     // to the display.
-    im.draw(&mut disp.color_converted()).unwrap();
+    im.draw(&mut display.color_converted()).unwrap();
 
-    disp.flush().unwrap();
+    display.flush().unwrap();
 
     loop {}
 }
