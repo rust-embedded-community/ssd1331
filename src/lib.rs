@@ -46,7 +46,7 @@
 //!
 //! ```rust
 //! # use ssd1331::test_helpers::{Spi, Pin};
-//! use embedded_graphics::{image::Image, pixelcolor::Rgb565, prelude::*};
+//! use embedded_graphics::{geometry::Point, image::Image, pixelcolor::Rgb565, prelude::*};
 //! use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 //! use tinybmp::Bmp;
 //!
@@ -55,16 +55,23 @@
 //! let dc = Pin;
 //!
 //! let mut display = Ssd1331::new(spi, dc, Rotate0);
-//! display.init();
+//! display.init().unwrap();
+//! display.flush().unwrap();
 //!
-//! let bmp = Bmp::from_slice(include_bytes!("../examples/rust-pride.bmp")).unwrap();
+//! let (w, h) = display.dimensions();
 //!
-//! let im: Image<Bmp, Rgb565> = Image::new(&bmp, Point::zero());
+//! let bmp = Bmp::from_slice(include_bytes!("../examples/rust-pride.bmp"))
+//!     .expect("Failed to load BMP image");
 //!
-//! // Center the image on the display
-//! let moved = im.translate(Point::new((96 - bmp.width() as i32) / 2, 0));
+//! let im: Image<Bmp<Rgb565>> = Image::new(&bmp, Point::zero());
 //!
-//! moved.draw(&mut display);
+//! // Position image in the center of the display
+//! let moved = im.translate(Point::new(
+//!     (w as u32 - bmp.size().width) as i32 / 2,
+//!     (h as u32 - bmp.size().height) as i32 / 2,
+//! ));
+//!
+//! moved.draw(&mut display).unwrap();
 //!
 //! display.flush().unwrap();
 //! ```

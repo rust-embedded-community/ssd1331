@@ -21,18 +21,16 @@ circle-ci = { repository = "jamwaffles/ssd1331", branch = "master" }
 [dependencies]
 embedded-hal = "0.2.3"
 
-[dependencies.embedded-graphics]
+[dependencies.embedded-graphics-core]
 optional = true
-version = "0.6.0"
+version = "0.3.2"
 
 [dev-dependencies]
 cortex-m = "0.6.1"
 cortex-m-rt = "0.6.11"
 panic-semihosting = "0.5.3"
-
-[dev-dependencies.tinybmp]
-version = "0.2.2"
-features = [ "graphics" ]
+embedded-graphics = "0.7.1"
+tinybmp = "0.3.1"
 
 [dev-dependencies.stm32f1xx-hal]
 version = "0.5.2"
@@ -40,7 +38,8 @@ features = [ "rt", "stm32f103" ]
 
 [features]
 default = ["graphics"]
-graphics = ["embedded-graphics"]
+graphics = ["embedded-graphics-core"]
+
 [profile.dev]
 codegen-units = 1
 incremental = false
