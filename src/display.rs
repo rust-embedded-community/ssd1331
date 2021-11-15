@@ -188,6 +188,25 @@ where
         Ok(())
     }
 
+    /// Send the full framebuffer to the display
+    ///
+    /// This resets the draw area the full size of the display
+    #[cfg(feature = "async")]
+    pub async fn flush_async(&mut self) -> Result<(), Error<CommE, PinE>> {
+        use embassy_traits::spi::Write as SpiTrait;
+
+        // Ensure the display buffer is at the origin of the display before we send the full frame
+        // to prevent accidental offsets
+        self.set_draw_area((0, 0), (DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1))?;
+
+        // 1 = data, 0 = command
+        self.dc.set_high().map_err(Error::Pin)?;
+
+        self.spi.write(&self.buffer).map_err(Error::Comm)?;
+
+        Ok(())
+    }
+
     /// Set the top left and bottom right corners of a bounding box to draw to
     pub fn set_draw_area(
         &mut self,

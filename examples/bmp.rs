@@ -21,6 +21,9 @@
 
 #![no_std]
 #![no_main]
+#![feature(type_alias_impl_trait)]
+#![feature(unchecked_math)]
+#![allow(incomplete_features)]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{geometry::Point, image::Image, pixelcolor::Rgb565, prelude::*};
