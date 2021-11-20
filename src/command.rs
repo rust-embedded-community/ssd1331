@@ -51,6 +51,7 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1331
+    #[cfg(feature = "embassy-async")]
     pub async fn send_async<SPI, DC, CommE, PinE>(
         self,
         spi: &mut SPI,

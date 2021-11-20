@@ -1,4 +1,7 @@
-//! cargo +nightly run --release --example embassy --features=embassy-async,embassy-dep
+//! The rust-toolchain will pull in the correct nightly and target so all you
+//! need to run is 
+//!
+//! cargo run --release
 //!
 #![no_main]
 #![no_std]
@@ -85,7 +88,7 @@ pub async fn display_task() {
     let (w, h) = display.dimensions();
 
     let bmp =
-        Bmp::from_slice(include_bytes!("./rust-pride.bmp")).expect("Failed to load BMP image");
+        Bmp::from_slice(include_bytes!("../../../assets/rust-pride.bmp")).expect("Failed to load BMP image");
 
     let im: Image<Bmp<Rgb565>> = Image::new(&bmp, Point::zero());
 

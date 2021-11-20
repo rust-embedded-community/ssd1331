@@ -1,0 +1,35 @@
+[package]
+name = "embassy-nrf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+embedded-hal = "0.2.6"
+embedded-graphics-core = { version = "0.3.2", optional = true }
+cortex-m = "0.7.3"
+cortex-m-rt = "0.6.11"
+embedded-graphics = "0.7.1"
+tinybmp = "0.3.1"
+futures = { version = "0.3.17", default-features = false }
+embassy = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
+embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+    "nrf52840",
+    "gpiote",
+    "time-driver-rtc1"
+] }
+ssd1331 = { path = "../../", features = ["embassy-async"] }
+
+[patch.crates-io]
+embassy = { git = "https://github.com/embassy-rs/embassy" }
+embassy-nrf = { git = "https://github.com/embassy-rs/embassy" }
+embassy-macros = { git = "https://github.com/embassy-rs/embassy" }
+embassy-traits = { git = "https://github.com/embassy-rs/embassy" }
+
+[profile.dev]
+codegen-units = 1
+incremental = false
+
+[profile.release]
+codegen-units = 1
+debug = true
+lto = true

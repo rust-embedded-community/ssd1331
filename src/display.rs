@@ -39,7 +39,7 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// let dc = Pin;
 ///
 /// let mut display = Ssd1331::new(spi, dc, Rotate0);
-/// let raw = ImageRawLE::new(include_bytes!("../examples/ferris.raw"), 86);
+/// let raw = ImageRawLE::new(include_bytes!("../assets/ferris.raw"), 86);
 ///
 /// let image: Image<ImageRawLE<Rgb565>> = Image::new(&raw, Point::zero());
 ///

@@ -31,10 +31,14 @@ You can also export images directly from The GIMP by saving as `.bmp` and choosi
 
 ## [Examples](examples)
 
+Examples are stored in per target directories in ssd1331-examples. cd to your preferred example
+
+`cd ssd1331-examples/stm32f1-examples/`
+
 This crate uses [`probe-run`](https://crates.io/crates/probe-run) to run the examples. Once set up, it should be as simple as `cargo run --example <example name> --release`. `--release` will be required for some examples to reduce FLASH usage.
 
 Load a BMP image of the Rust logo and display it in the center of the display. From
-[`examples/bmp.rs`](examples/bmp.rs):
+[`ssd1331-examples/stm32f1-examples/bmp.rs`](examples/bmp.rs):
 
 ```rust
 #![no_std]
@@ -93,7 +97,7 @@ fn main() -> ! {
     let (w, h) = disp.dimensions();
 
     let bmp =
-        Bmp::from_slice(include_bytes!("./rust-pride.bmp")).expect("Failed to load BMP image");
+        Bmp::from_slice(include_bytes!("../../../assets/rust-pride.bmp")).expect("Failed to load BMP image");
 
     let im: Image<Bmp<Rgb565>> = Image::new(&bmp, Point::zero());
 
