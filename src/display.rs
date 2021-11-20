@@ -99,6 +99,36 @@ pub struct Ssd1331<SPI, DC> {
     dc: DC,
 }
 
+#[cfg(feature = "embassy-async")]
+impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>
+where
+    SPI: embassy_traits::spi::Write<u8> + embassy_traits::spi::Spi<u8, Error = CommE>,
+    DC: OutputPin<Error = PinE>,
+{
+    /// Send the full framebuffer to the display
+    ///
+    /// This resets the draw area the full size of the display
+    pub async fn flush_async(&mut self) -> Result<(), Error<CommE, PinE>> {
+        // Ensure the display buffer is at the origin of the display before we send the full frame
+        // to prevent accidental offsets
+        // self.set_draw_area((0, 0), (DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1))?;
+
+        Command::ColumnAddress(0, DISPLAY_WIDTH - 1)
+            .send_async(&mut self.spi, &mut self.dc)
+            .await?;
+        Command::RowAddress(0.into(), (DISPLAY_HEIGHT - 1).into())
+            .send_async(&mut self.spi, &mut self.dc)
+            .await?;
+
+        // 1 = data, 0 = command
+        self.dc.set_high().map_err(Error::Pin)?;
+
+        embassy_traits::spi::Write::write(&mut self.spi, &self.buffer)
+            .await
+            .map_err(Error::Comm)
+    }
+}
+
 impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8, Error = CommE>,
@@ -176,25 +206,6 @@ where
     ///
     /// This resets the draw area the full size of the display
     pub fn flush(&mut self) -> Result<(), Error<CommE, PinE>> {
-        // Ensure the display buffer is at the origin of the display before we send the full frame
-        // to prevent accidental offsets
-        self.set_draw_area((0, 0), (DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1))?;
-
-        // 1 = data, 0 = command
-        self.dc.set_high().map_err(Error::Pin)?;
-
-        self.spi.write(&self.buffer).map_err(Error::Comm)?;
-
-        Ok(())
-    }
-
-    /// Send the full framebuffer to the display
-    ///
-    /// This resets the draw area the full size of the display
-    #[cfg(feature = "async")]
-    pub async fn flush_async(&mut self) -> Result<(), Error<CommE, PinE>> {
-        use embassy_traits::spi::Write as SpiTrait;
-
         // Ensure the display buffer is at the origin of the display before we send the full frame
         // to prevent accidental offsets
         self.set_draw_area((0, 0), (DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1))?;

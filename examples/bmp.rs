@@ -22,8 +22,10 @@
 #![no_std]
 #![no_main]
 
+use core::future::Future;
+use core::ptr::null_mut;
+use core::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embassy_traits::spi::Write;
 use embedded_graphics::{geometry::Point, image::Image, pixelcolor::Rgb565, prelude::*};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
@@ -104,10 +106,6 @@ fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }
 
-use core::future::Future;
-use core::ptr::null_mut;
-use core::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
-
 unsafe fn waker_clone(p: *const ()) -> RawWaker {
     RawWaker::new(p, &VTABLE)
 }
@@ -124,5 +122,14 @@ pub fn block_on<F: Future>(future: F) -> F::Output {
         if let Poll::Ready(output) = future.as_mut().poll(&mut cx) {
             return output;
         }
+    }
+}
+
+impl<'d, T: Instance> embassy_traits::spi::Write<u8> for Spim<'d, T> {
+    #[rustfmt::skip]
+    type WriteFuture<'a> where Self: 'a = impl Future<Output=Result<(), Self::Error>> + 'a;
+
+    fn write<'a>(&'a mut self, data: &'a [u8]) -> Self::WriteFuture<'a> {
+        self.read_write(&mut [], data)
     }
 }

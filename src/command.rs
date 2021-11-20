@@ -51,6 +51,74 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1331
+    pub async fn send_async<SPI, DC, CommE, PinE>(
+        self,
+        spi: &mut SPI,
+        dc: &mut DC,
+    ) -> Result<(), Error<CommE, PinE>>
+    where
+        SPI: embassy_traits::spi::Write<u8> + embassy_traits::spi::Spi<u8, Error = CommE>,
+        DC: OutputPin<Error = PinE>,
+    {
+        // Transform command into a fixed size array of 7 u8 and the real length for sending
+        let (data, len) = match self {
+            Command::Contrast(a, b, c) => ([0x81, a, 0x82, b, 0x83, c, 0], 6),
+            // TODO: Collapse AllOn and Invert commands into new DisplayMode cmd with enum
+            Command::AllOn(on) => ([if on { 0xA5 } else { 0xA6 }, 0, 0, 0, 0, 0, 0], 1),
+            Command::Invert(inv) => ([if inv { 0xA7 } else { 0xA4 }, 0, 0, 0, 0, 0, 0], 1),
+            Command::DisplayOn(on) => ([0xAE | (on as u8), 0, 0, 0, 0, 0, 0], 1),
+            Command::ColumnAddress(start, end) => ([0x15, start, end, 0, 0, 0, 0], 3),
+            Command::RowAddress(start, end) => ([0x75, start, end, 0, 0, 0, 0], 3),
+            Command::StartLine(line) => ([0xA1, (0x3F & line), 0, 0, 0, 0, 0], 2),
+            Command::RemapAndColorDepth(hremap, vremap, cmode, addr_inc_mode) => (
+                [
+                    0xA0,
+                    0x20 | ((vremap as u8) << 4
+                        | (hremap as u8) << 1
+                        | (cmode as u8) << 6
+                        | (addr_inc_mode as u8)),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
+            Command::Multiplex(ratio) => ([0xA8, ratio, 0, 0, 0, 0, 0], 2),
+            Command::ReverseComDir(rev) => ([0xC0 | ((rev as u8) << 3), 0, 0, 0, 0, 0, 0], 1),
+            Command::DisplayOffset(offset) => ([0xA2, offset, 0, 0, 0, 0, 0], 2),
+            Command::ComPinConfig(alt, lr) => (
+                [
+                    0xDA,
+                    0x2 | ((alt as u8) << 4) | ((lr as u8) << 5),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
+            Command::DisplayClockDiv(fosc, div) => {
+                ([0xB3, ((0xF & fosc) << 4) | (0xF & div), 0, 0, 0, 0, 0], 2)
+            }
+            Command::PreChargePeriod(phase1, phase2) => (
+                [0x3e, ((0xF & phase2) << 4) | (0xF & phase1), 0, 0, 0, 0, 0],
+                2,
+            ),
+            Command::VcomhDeselect(level) => ([0xBE, (level as u8) << 1, 0, 0, 0, 0, 0], 2),
+            Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
+        };
+
+        // Command mode. 1 = data, 0 = command
+        dc.set_low().map_err(Error::Pin)?;
+
+        // Send command over the interface
+        spi.write(&data[0..len]).await.map_err(Error::Comm)
+    }
+
+    /// Send command to SSD1331
     pub fn send<SPI, DC, CommE, PinE>(
         self,
         spi: &mut SPI,
