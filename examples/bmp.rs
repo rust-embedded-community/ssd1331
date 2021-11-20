@@ -17,14 +17,11 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo +nightly run --release --example bmp --features=async`.
+//! Run on a Blue Pill with `cargo run --release --example image`.
 
 #![no_std]
 #![no_main]
 
-use core::future::Future;
-use core::ptr::null_mut;
-use core::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 use cortex_m_rt::{entry, exception, ExceptionFrame};
 use embedded_graphics::{geometry::Point, image::Image, pixelcolor::Rgb565, prelude::*};
 use panic_semihosting as _;
@@ -96,7 +93,7 @@ fn main() -> ! {
 
     moved.draw(&mut display).unwrap();
 
-    block_on(display.flush_async()).unwrap();
+    display.flush().unwrap();
 
     loop {}
 }
@@ -104,32 +101,4 @@ fn main() -> ! {
 #[exception]
 fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
-}
-
-unsafe fn waker_clone(p: *const ()) -> RawWaker {
-    RawWaker::new(p, &VTABLE)
-}
-
-unsafe fn waker_nop(_p: *const ()) {}
-
-static VTABLE: RawWakerVTable = RawWakerVTable::new(waker_clone, waker_nop, waker_nop, waker_nop);
-
-pub fn block_on<F: Future>(future: F) -> F::Output {
-    futures::pin_mut!(future);
-    let waker = &unsafe { Waker::from_raw(RawWaker::new(null_mut(), &VTABLE)) };
-    let mut cx = Context::from_waker(waker);
-    loop {
-        if let Poll::Ready(output) = future.as_mut().poll(&mut cx) {
-            return output;
-        }
-    }
-}
-
-impl<'d, T: Instance> embassy_traits::spi::Write<u8> for Spim<'d, T> {
-    #[rustfmt::skip]
-    type WriteFuture<'a> where Self: 'a = impl Future<Output=Result<(), Self::Error>> + 'a;
-
-    fn write<'a>(&'a mut self, data: &'a [u8]) -> Self::WriteFuture<'a> {
-        self.read_write(&mut [], data)
-    }
 }
