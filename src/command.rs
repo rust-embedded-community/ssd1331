@@ -51,14 +51,14 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1331
-    #[cfg(feature = "embassy-async")]
+    #[cfg(feature = "embedded-async")]
     pub async fn send_async<SPI, DC, CommE, PinE>(
         self,
         spi: &mut SPI,
         dc: &mut DC,
     ) -> Result<(), Error<CommE, PinE>>
     where
-        SPI: embassy_traits::spi::Write<u8> + embassy_traits::spi::Spi<u8, Error = CommE>,
+        SPI: embedded_hal_async::spi::SpiBusWrite<u8, Error = CommE>,
         DC: OutputPin<Error = PinE>,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending

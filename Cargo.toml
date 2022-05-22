@@ -22,7 +22,7 @@ circle-ci = { repository = "jamwaffles/ssd1331", branch = "master" }
 [dependencies]
 embedded-hal = "0.2.3"
 embedded-graphics-core = { version = "0.3.2", optional = true }
-embassy-traits = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", optional = true }
+embedded-hal-async = { git = "https://github.com/rust-embedded/embedded-hal" }
 
 [dev-dependencies]
 cortex-m = "0.7.3"
@@ -35,7 +35,7 @@ stm32f1xx-hal = { version = "0.7.0", features = ["rt", "stm32f103"] }
 [features]
 default = ["graphics"]
 graphics = ["embedded-graphics-core"]
-embassy-async = ["embassy-traits"]
+embedded-async = []
 
 [profile.dev]
 codegen-units = 1

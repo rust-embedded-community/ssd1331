@@ -11,11 +11,10 @@ use core::future::pending;
 use embassy::interrupt::InterruptExt;
 use embassy::time::{Duration, Timer};
 use embassy::util::Forever;
-use embassy_nrf::gpio::{self, AnyPin, Level, NoPin, Output, OutputDrive, Pin};
+use embassy_nrf::gpio::{self, AnyPin, Level, Output, OutputDrive, Pin};
 use embassy_nrf::{interrupt, spim};
 use embedded_graphics::prelude::*;
 use embedded_graphics::{image::Image, pixelcolor::Rgb565};
-use embedded_hal::digital::v2::OutputPin;
 use ssd1331::{DisplayRotation, Ssd1331};
 use tinybmp::Bmp;
 
@@ -48,9 +47,9 @@ fn main() -> ! {
 #[embassy::task]
 async fn blinky_task(mut green: gpio::Output<'static, AnyPin>) {
     loop {
-        green.set_high().unwrap();
+        green.set_high();
         Timer::after(Duration::from_millis(300)).await;
-        green.set_low().unwrap();
+        green.set_low();
         Timer::after(Duration::from_millis(1000)).await;
     }
 }
@@ -67,11 +66,10 @@ pub async fn display_task() {
 
     let mut spim_config = spim::Config::default();
     spim_config.frequency = spim::Frequency::M16;
-    let spim = spim::Spim::new(
+    let spim = spim::Spim::new_txonly(
         &mut dp.SPI3,
         &mut spim_irq,
         &mut dp.P0_21,
-        NoPin,
         &mut dp.P0_17,
         spim_config,
     );
@@ -80,9 +78,9 @@ pub async fn display_task() {
     let dc = Output::new(&mut dp.P0_15, Level::High, OutputDrive::Standard);
     let mut display = Ssd1331::new(spim, dc, DisplayRotation::Rotate0);
     Timer::after(Duration::from_millis(1)).await;
-    rst.set_low().ok();
+    rst.set_low();
     Timer::after(Duration::from_millis(1)).await;
-    rst.set_high().ok();
+    rst.set_high();
     display.init().unwrap();
 
     let (w, h) = display.dimensions();

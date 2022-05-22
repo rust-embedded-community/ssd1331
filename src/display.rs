@@ -99,10 +99,10 @@ pub struct Ssd1331<SPI, DC> {
     dc: DC,
 }
 
-#[cfg(feature = "embassy-async")]
+#[cfg(feature = "embedded-async")]
 impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>
 where
-    SPI: embassy_traits::spi::Write<u8> + embassy_traits::spi::Spi<u8, Error = CommE>,
+    SPI: embedded_hal_async::spi::SpiBusWrite<u8, Error = CommE>,
     DC: OutputPin<Error = PinE>,
 {
     /// Send the full framebuffer to the display
@@ -123,7 +123,7 @@ where
         // 1 = data, 0 = command
         self.dc.set_high().map_err(Error::Pin)?;
 
-        embassy_traits::spi::Write::write(&mut self.spi, &self.buffer)
+        embedded_hal_async::spi::SpiBusWrite::write(&mut self.spi, &self.buffer)
             .await
             .map_err(Error::Comm)
     }
