@@ -13,7 +13,7 @@ version = "0.3.0"
 edition = "2018"
 
 [package.metadata.docs.rs]
-targets = [ "thumbv7m-none-eabi" ]
+targets = ["thumbv7m-none-eabi"]
 all-features = true
 
 [badges]
@@ -22,6 +22,7 @@ circle-ci = { repository = "jamwaffles/ssd1331", branch = "master" }
 [dependencies]
 embedded-hal = "0.2.3"
 embedded-graphics-core = { version = "0.3.2", optional = true }
+embedded-hal-async = { git = "https://github.com/rust-embedded/embedded-hal" }
 
 [dev-dependencies]
 cortex-m = "0.7.3"
@@ -29,11 +30,12 @@ cortex-m-rt = "0.6.11"
 panic-semihosting = "0.5.3"
 embedded-graphics = "0.7.1"
 tinybmp = "0.3.1"
-stm32f1xx-hal = { version = "0.7.0", features = [ "rt", "stm32f103" ] }
+stm32f1xx-hal = { version = "0.7.0", features = ["rt", "stm32f103"] }
 
 [features]
 default = ["graphics"]
 graphics = ["embedded-graphics-core"]
+embedded-async = []
 
 [profile.dev]
 codegen-units = 1

@@ -39,7 +39,7 @@ const BUF_SIZE: usize = 96 * 64 * 2;
 /// let dc = Pin;
 ///
 /// let mut display = Ssd1331::new(spi, dc, Rotate0);
-/// let raw = ImageRawLE::new(include_bytes!("../examples/ferris.raw"), 86);
+/// let raw = ImageRawLE::new(include_bytes!("../assets/ferris.raw"), 86);
 ///
 /// let image: Image<ImageRawLE<Rgb565>> = Image::new(&raw, Point::zero());
 ///
@@ -97,6 +97,36 @@ pub struct Ssd1331<SPI, DC> {
 
     /// Data/Command pin
     dc: DC,
+}
+
+#[cfg(feature = "embedded-async")]
+impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>
+where
+    SPI: embedded_hal_async::spi::SpiBusWrite<u8, Error = CommE>,
+    DC: OutputPin<Error = PinE>,
+{
+    /// Send the full framebuffer to the display
+    ///
+    /// This resets the draw area the full size of the display
+    pub async fn flush_async(&mut self) -> Result<(), Error<CommE, PinE>> {
+        // Ensure the display buffer is at the origin of the display before we send the full frame
+        // to prevent accidental offsets
+        // self.set_draw_area((0, 0), (DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1))?;
+
+        Command::ColumnAddress(0, DISPLAY_WIDTH - 1)
+            .send_async(&mut self.spi, &mut self.dc)
+            .await?;
+        Command::RowAddress(0.into(), (DISPLAY_HEIGHT - 1).into())
+            .send_async(&mut self.spi, &mut self.dc)
+            .await?;
+
+        // 1 = data, 0 = command
+        self.dc.set_high().map_err(Error::Pin)?;
+
+        embedded_hal_async::spi::SpiBusWrite::write(&mut self.spi, &self.buffer)
+            .await
+            .map_err(Error::Comm)
+    }
 }
 
 impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>

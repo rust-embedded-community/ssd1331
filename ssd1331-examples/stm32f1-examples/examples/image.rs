@@ -1,4 +1,4 @@
-//! Draw the Rust logo centered on a 90 degree rotated 128x64px display
+//! Draw a 1 bit per pixel black and white image. On a 128x64 SSD1331 display over I2C.
 //!
 //! Image was created with ImageMagick:
 //!
@@ -20,15 +20,18 @@
 //! PB1 -> D/C
 //! ```
 //!
-//! Run on a Blue Pill with `cargo run --release --example rotation`.
+//! Run on a Blue Pill with `cargo run --release --example image`.
 
 #![no_std]
 #![no_main]
 
 use cortex_m_rt::{entry, exception, ExceptionFrame};
-use embedded_graphics::{image::ImageRawLE, pixelcolor::BinaryColor, prelude::*};
+use embedded_graphics::{
+    image::{Image, ImageRawLE},
+    prelude::*,
+};
 use panic_semihosting as _;
-use ssd1331::{DisplayRotation, Ssd1331};
+use ssd1331::{DisplayRotation::Rotate0, Ssd1331};
 use stm32f1xx_hal::{
     delay::Delay,
     prelude::*,
@@ -74,23 +77,19 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    // Initialise the display with a default rotation of 90 degrees
-    let mut display = Ssd1331::new(spi, dc, DisplayRotation::Rotate90);
+    let mut display = Ssd1331::new(spi, dc, Rotate0);
 
     display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
     display.flush().unwrap();
 
-    // Set a new rotation of 270 degrees
-    display.set_rotation(DisplayRotation::Rotate270).unwrap();
+    // Loads an 86x64px image encoded in LE (Little Endian) format. This image is a 16BPP image of
+    // the Rust mascot, Ferris.
+    let im = ImageRawLE::new(include_bytes!("../../../assets/ferris.raw"), 86);
 
-    // Load a 1BPP 64x64px image with LE (Little Endian) encoding of the Rust logo, white foreground
-    // black background
-    let im = ImageRawLE::<BinaryColor>::new(include_bytes!("./rust.raw"), 64);
-
-    // Use `color_converted` to create a wrapper that converts BinaryColors to Rgb565 colors to send
-    // to the display.
-    im.draw(&mut display.color_converted()).unwrap();
+    Image::new(&im, Point::new((96 - 86) / 2, 0))
+        .draw(&mut display)
+        .unwrap();
 
     display.flush().unwrap();
 

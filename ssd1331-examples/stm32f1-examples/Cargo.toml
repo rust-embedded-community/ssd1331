@@ -1,0 +1,24 @@
+[package]
+name = "stm32f1-examples"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+embedded-hal = "0.2.6"
+cortex-m = "0.7.3"
+cortex-m-rt = "0.6.11"
+embedded-graphics = "0.7.1"
+tinybmp = "0.3.1"
+stm32f1xx-hal = { version = "0.7.0", features = ["rt", "stm32f103"] }
+panic-semihosting = "0.5.3"
+ssd1331 = { path = "../../" }
+
+[profile.dev]
+codegen-units = 1
+incremental = false
+
+[profile.release]
+codegen-units = 1
+debug = true
+lto = true

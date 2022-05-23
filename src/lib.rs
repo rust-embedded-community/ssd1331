@@ -60,7 +60,7 @@
 //!
 //! let (w, h) = display.dimensions();
 //!
-//! let bmp = Bmp::from_slice(include_bytes!("../examples/rust-pride.bmp"))
+//! let bmp = Bmp::from_slice(include_bytes!("../assets/rust-pride.bmp"))
 //!     .expect("Failed to load BMP image");
 //!
 //! let im: Image<Bmp<Rgb565>> = Image::new(&bmp, Point::zero());
