@@ -1,7 +1,8 @@
 // Shamefully taken from https://github.com/EdgewaterDevelopment/rust-ssd1331
 
 use crate::error::Error;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::digital::OutputPin;
+use hal::spi::SpiBus;
 
 /// SSD1331 Commands
 #[derive(Debug)]
@@ -57,7 +58,7 @@ impl Command {
         dc: &mut DC,
     ) -> Result<(), Error<CommE, PinE>>
     where
-        SPI: hal::blocking::spi::Write<u8, Error = CommE>,
+        SPI: SpiBus<Error = CommE>,
         DC: OutputPin<Error = PinE>,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending

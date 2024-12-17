@@ -1,42 +1,42 @@
 //! Helpers for use in examples and tests
 
-use embedded_hal::{
-    blocking::spi::{self, Transfer},
-    digital::v2::OutputPin,
-};
+use hal::{digital::OutputPin, spi::SpiDevice};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub struct Spi;
 
-impl spi::Write<u8> for Spi {
-    type Error = ();
-
-    fn write(&mut self, _buf: &[u8]) -> Result<(), ()> {
+impl SpiDevice for Spi {
+    fn transaction(
+        &mut self,
+        _operations: &mut [hal::spi::Operation<'_, u8>],
+    ) -> Result<(), Self::Error> {
         Ok(())
+    }
+
+    fn transfer(&mut self, read: &mut [u8], write: &[u8]) -> Result<(), Self::Error> {
+        self.transaction(&mut [hal::spi::Operation::Transfer(read, write)])
     }
 }
 
-impl Transfer<u8> for Spi {
-    type Error = ();
-
-    fn transfer<'a>(&mut self, buf: &'a mut [u8]) -> Result<&'a [u8], ()> {
-        Ok(buf)
-    }
+impl hal::spi::ErrorType for Spi {
+    type Error = hal::spi::ErrorKind;
 }
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub struct Pin;
 
-impl OutputPin for Pin {
-    type Error = ();
+impl hal::digital::ErrorType for Pin {
+    type Error = hal::digital::ErrorKind;
+}
 
-    fn set_high(&mut self) -> Result<(), ()> {
+impl OutputPin for Pin {
+    fn set_low(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn set_low(&mut self) -> Result<(), ()> {
+    fn set_high(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 }

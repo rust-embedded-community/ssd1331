@@ -1,4 +1,4 @@
-use hal::{blocking::delay::DelayMs, digital::v2::OutputPin};
+use hal::{delay::DelayNs, digital::OutputPin, spi::SpiBus};
 
 use crate::{
     command::{AddressIncrementMode, ColorMode, Command, VcomhLevel},
@@ -101,7 +101,7 @@ pub struct Ssd1331<SPI, DC> {
 
 impl<SPI, DC, CommE, PinE> Ssd1331<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8, Error = CommE>,
+    SPI: SpiBus<Error = CommE>,
     DC: OutputPin<Error = PinE>,
 {
     /// Create new display instance
@@ -161,7 +161,7 @@ where
     ) -> Result<(), Error<CommE, PinE>>
     where
         RST: OutputPin<Error = PinE>,
-        DELAY: DelayMs<u8>,
+        DELAY: DelayNs,
     {
         rst.set_high().map_err(Error::Pin)?;
         delay.delay_ms(1);
@@ -195,7 +195,7 @@ where
         end: (u8, u8),
     ) -> Result<(), Error<CommE, PinE>> {
         Command::ColumnAddress(start.0, end.0).send(&mut self.spi, &mut self.dc)?;
-        Command::RowAddress(start.1.into(), (end.1).into()).send(&mut self.spi, &mut self.dc)?;
+        Command::RowAddress(start.1, end.1).send(&mut self.spi, &mut self.dc)?;
         Ok(())
     }
 
@@ -373,7 +373,7 @@ use embedded_graphics_core::{
 #[cfg(feature = "graphics")]
 impl<SPI, DC> DrawTarget for Ssd1331<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8>,
+    SPI: SpiBus,
     DC: OutputPin,
 {
     type Color = Rgb565;
@@ -399,7 +399,7 @@ where
 #[cfg(feature = "graphics")]
 impl<SPI, DC> OriginDimensions for Ssd1331<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8>,
+    SPI: SpiBus,
     DC: OutputPin,
 {
     fn size(&self) -> Size {
