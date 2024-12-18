@@ -46,10 +46,10 @@ fn main() -> ! {
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+    let mut afio = dp.AFIO.constrain();
 
-    let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpioa = dp.GPIOA.split();
+    let mut gpiob = dp.GPIOB.split();
 
     // SPI1
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
@@ -71,7 +71,6 @@ fn main() -> ! {
         },
         8.mhz(),
         clocks,
-        &mut rcc.apb2,
     );
 
     // Initialise the display with a default rotation of 90 degrees
@@ -98,6 +97,6 @@ fn main() -> ! {
 }
 
 #[exception]
-fn HardFault(ef: &ExceptionFrame) -> ! {
+unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }

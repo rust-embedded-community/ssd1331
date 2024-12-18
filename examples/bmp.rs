@@ -22,12 +22,12 @@
 #![no_std]
 #![no_main]
 
-use cortex_m_rt::{entry, exception, ExceptionFrame};
+use cortex_m::delay::Delay;
+use cortex_m_rt::{entry, exception};
 use embedded_graphics::{geometry::Point, image::Image, pixelcolor::Rgb565, prelude::*};
 use panic_semihosting as _;
 use ssd1331::{DisplayRotation, Ssd1331};
 use stm32f1xx_hal::{
-    delay::Delay,
     prelude::*,
     spi::{Mode, Phase, Polarity, Spi},
     stm32,
@@ -44,22 +44,22 @@ fn main() -> ! {
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+    let mut afio = dp.AFIO.constrain();
 
-    let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpioa = dp.GPIOA.split();
+    let mut gpiob = dp.GPIOB.split();
 
     // SPI1
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
     let miso = gpioa.pa6;
     let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let mut delay = Delay::new(cp.SYST, clocks);
+    let mut delay = Delay::new(cp.SYST, clocks.hclk().to_Hz());
 
     let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
-    let spi = Spi::spi1(
+    let mut spi = Spi::spi1(
         dp.SPI1,
         (sck, miso, mosi),
         &mut afio.mapr,
@@ -67,9 +67,8 @@ fn main() -> ! {
             polarity: Polarity::IdleLow,
             phase: Phase::CaptureOnFirstTransition,
         },
-        8.mhz(),
+        8.MHz(),
         clocks,
-        &mut rcc.apb2,
     );
 
     let mut display = Ssd1331::new(spi, dc, DisplayRotation::Rotate0);

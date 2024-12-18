@@ -50,10 +50,10 @@ fn main() -> ! {
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+    let mut afio = dp.AFIO.constrain();
 
-    let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpioa = dp.GPIOA.split();
+    let mut gpiob = dp.GPIOB.split();
 
     // SPI1
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
@@ -65,7 +65,7 @@ fn main() -> ! {
     let mut rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
-    let spi = Spi::spi1(
+    let spi = Spi::new(
         dp.SPI1,
         (sck, miso, mosi),
         &mut afio.mapr,
@@ -73,12 +73,11 @@ fn main() -> ! {
             polarity: Polarity::IdleLow,
             phase: Phase::CaptureOnFirstTransition,
         },
-        8.mhz(),
+        8.MHz(),
         clocks,
-        &mut rcc.apb2,
     );
 
-    let mut display = Ssd1331::new(spi, dc, Rotate0);
+    let mut display = Ssd1331::new(spi.into(), dc, Rotate0);
 
     display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
@@ -115,6 +114,6 @@ fn main() -> ! {
 }
 
 #[exception]
-fn HardFault(ef: &ExceptionFrame) -> ! {
+unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("{:#?}", ef);
 }
